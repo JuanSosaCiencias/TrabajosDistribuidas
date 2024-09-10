@@ -306,13 +306,66 @@ defmodule Practica01 do
     List.last(lst)
   end
 
-  def encapsula(_lst) do
+  @doc """
+  Dada una lista de listas, regresa una lista de tuplas.
+  En la tupla i se encuentran los elementos i-ésimos de cada lista.
+
+  ## Parámetros
+
+    - lst: Una lista de listas
+
+  ## Ejemplos
+
+      iex> encapsula([[1, 2], [3, 4], [5, 6]])
+      [{1, 3, 5}, {2, 4, 6}]
+      iex> encapsula([[:a, :b], [:c, :d]])
+      [{:a, :c}, {:b, :d}]
+      iex> encapsula([[], []])
+      []
+  """
+  def encapsula(lst) when is_list(lst) do
+    Enum.zip(lst)
   end
 
-  def mapBorra(_map, _key) do
+  @doc """
+  Dado un mapa y una clave, elimina la clave del mapa.
+
+  ## Parámetros
+
+    - map: Un mapa
+    - key: Una clave
+
+  ## Ejemplos
+
+      iex> mapBorra(%{a: 1, b: 2, c: 3}, :b)
+      %{a: 1, c: 3}
+      iex> mapBorra(%{x: 10, y: 20}, :z)
+      %{x: 10, y: 20}
+      iex> mapBorra(%{}, :key)
+      %{}
+  """
+  def mapBorra(map, key) when is_map(map) and is_atom(key) do
+    Map.delete(map, key)
   end
 
-  def mapAlista(_map) do
+  @doc """
+  Dado un mapa, regresa una lista de tuplas con las claves y valores del mapa.
+
+  ## Parámetros
+
+    - map: Un mapa
+
+  ## Ejemplos
+
+      iex> mapAlista(%{a: 1, b: 2})
+      [a: 1, b: 2]
+      iex> mapAlista(%{})
+      []
+      iex> mapAlista(%{x: 10})
+      [x: 10]
+  """
+  def mapAlista(map) when is_map(map) do
+    Map.to_list(map)
   end
 
   def dist(_a, _b) do
