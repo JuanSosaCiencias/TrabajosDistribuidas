@@ -1,6 +1,6 @@
 ExUnit.start() # framework para pruebas unitarias en elixir
 
-defmodule P01 do
+defmodule Practica01 do
   @moduledoc """
   Modulo con las funciones de la practica01
   """
