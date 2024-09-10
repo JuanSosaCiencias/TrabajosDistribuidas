@@ -306,10 +306,6 @@ defmodule P01 do
     List.last(lst)
   end
 
-  def raboLista(_) do
-    raise ArgumentError, "Los argumentos deben ser una lista y un índice entero válido."
-  end
-
   def encapsula(_lst) do
   end
 
