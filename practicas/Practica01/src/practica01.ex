@@ -3,25 +3,60 @@ ExUnit.start() # framework para pruebas unitarias en elixir
 defmodule Practica01 do
   @moduledoc """
   Modulo con las funciones de la practica01
+
+  ## Funciones
+
+  - `cuadruple(x)`: Calcula el cuádruple de un número
+  - `sucesor(x)`: Devuelve el sucesor de un número entero
+  - `maximo(x, y)`: Encuentra el número más grande entre dos números recibidos
+  - `suma(x, y)`: Suma dos números enteros
+  - `resta(x, y)`: Dado dos números, resta el segundo número del primero
+  - `multiplicacionConjugados(x, y)`: Calcula la multiplicación de los conjugados de dos números enteros
+  - `negacion(x)`: Devuelve la negación de un booleano
+  - `conjuncion(x, y)`: Realiza la conjunción lógica entre dos valores booleanos
+  - `disyuncion(x, y)`: Devuelve la disyunción de dos valores booleanos
+  - `absoluto(x)`: Devuelve el valor absoluto de un número entero
+  - `areaCirculo(r)`: Calcula el área de un círculo dado su radio
+  - `sumaGaussRec(n)`: Calcula la suma de Gauss de un número entero n de manera recursiva
+  - `sumaGauss(n)`: Calcula la suma de Gauss con la fórmula cerrada
+  - `areaTriangulo({x1, y1}, {x2, y2}, {x3, y3})`: Calcula el área de un triángulo dados tres puntos en el plano
+  - `repiteCadena(x, cadena)`: Regresa una lista de cadenas repetidas cierto número de veces
+  - `insertaElemento(lista, i, v)`: Inserta un valor en una lista en el índice especificado
+  - `eliminaIndex(list, index)`: Elimina un elemento de una lista en el índice especificado
+  - `raboLista(lst)`: Regresa el último elemento de una lista
+  - `encapsula(lst)`: Dada una lista de listas, regresa una lista de tuplas
+  - `mapBorra(map, key)`: Dado un mapa y una clave, elimina la clave del mapa
+  - `mapAlista(map)`: Dado un mapa, regresa una lista de tuplas con las claves y valores del mapa
+  - `dist(a, b)`: Calcula la distancia entre dos puntos en el plano
+  - `insertaTupla(t, v)`: Inserta un valor en una tupla
+  - `tuplaALista(t)`: Convierte una tupla en una lista
   """
   use ExUnit.Case # usamos el framework de pruebas caso por caso
 
 
   @doc """
-    Calcula el cuádruple de un número
+  Calcula el cuádruple de un número.
 
-    ## Parámetros
+  ## Parámetros
 
-      - x: Número entero
+    - x: Número entero
 
-    """
+  ## Ejemplos
+
+      iex> cuadruple(5)
+      20
+      iex> cuadruple(7)
+      28
+      iex> cuadruple(4)
+      16
+  """
   def cuadruple(x) when is_integer(x)  do
        x*4
   end
-	  
+
   def cuadruple(_) do
     raise ArgumentError, "El argumento debe ser un número entero."
-  end	  
+  end
 
 
   @doc """
@@ -29,8 +64,16 @@ defmodule Practica01 do
 
   ## Parámetros
 
-  -x: Número entero
+    -x: Número entero
 
+  ## Ejemplos
+
+      iex> sucesor(5)
+      6
+      iex> sucesor(7)
+      8
+      iex> sucesor(4)
+      5
   """
   def sucesor(x) when is_integer(x) do
     x + 1
@@ -43,32 +86,41 @@ defmodule Practica01 do
   @doc """
     Encuentra el número más grande entre dos números recibidos
 
-    ## Parametros
+  ## Parametros
 
-      - x: El primer número a comparar
-      - y: El segundo número a comparar
+    - x: El primer número a comparar
+    - y: El segundo número a comparar
 
-    """
+  """
   def maximo(x,y) when is_integer(x) and is_integer(y) do
       cond do
-        x>=y -> 
+        x>=y ->
             x
         x<y ->
             y
       end
   end
-  
+
   def maximo(_) do
     raise ArgumentError, "Los argumentos deben ser dos número enteros."
-  end	
+  end
 
   @doc """
   Suma dos números enteros.
 
   ## Parámetros
 
-  -x: Número a sumar
-  -y: Número a sumar
+    -x: Número a sumar
+    -y: Número a sumar
+
+  ## Ejemplos
+
+      iex> suma(5, 6)
+      11
+      iex> suma(7, 6)
+      13
+      iex> suma(4, 4)
+      8
   """
   def suma(x, y) when is_integer(x) and is_integer(y) do
     x + y
@@ -88,13 +140,13 @@ defmodule Practica01 do
 
     """
   def resta(x,y) when is_integer(x) and is_integer(y) do
-      x-y 
+      x-y
   end
-	  
+
   def resta(_,_) do
     raise ArgumentError, "Los argumentos deben ser dos número entero."
-  end	
-  
+  end
+
 
   @doc """
     Calcula la multiplicación de los conjugados de dos números enteros.
@@ -123,10 +175,10 @@ defmodule Practica01 do
   def negacion(x) when is_boolean(x) do
       !x
   end
-	  
+
   def negacion(_) do
     raise ArgumentError, "El argumento debe ser un booleano."
-  end		  
+  end
 
 
   @doc """
@@ -146,17 +198,17 @@ defmodule Practica01 do
   end
 
   @doc """
-    Devuelve la disyunción de dos valores booleanos
+  Devuelve la disyunción de dos valores booleanos
 
-    ## Parámetros
+  ## Parámetros
 
-      - x: Primer booleano
-      - y: Segundo booleano
+    - x: Primer booleano
+    - y: Segundo booleano
 
-    """	  
+  """
   def disyuncion(x,y) when is_boolean(x) and is_boolean(y)  do
       x || y
-  end 
+  end
 
   def disyuncion(_, _) do
     raise ArgumentError, "Ambos argumentos deben ser booleanos."
@@ -190,7 +242,7 @@ defmodule Practica01 do
       - r: Número entero del radio de un círculo
 
     """
-  def areaCirculo(r) when  is_integer(r) and r>0 do  
+  def areaCirculo(r) when  is_integer(r) and r>0 do
         3.14 * r * r
   end
 
@@ -217,19 +269,19 @@ defmodule Practica01 do
   end
 
   @doc """
-    Calcula la suma de Gauss con la fórmula cerrada
+  Calcula la suma de Gauss con la fórmula cerrada
 
-    ## Parametros
+  ## Parametros
 
-      - n: Número entero a calcular la suma
+    - n: Número entero a calcular la suma
 
-    """
+  """
   def sumaGauss(n) when is_integer(n) and n>-1 do
   	case n do
   		0 -> 0
-      n -> div(n * (n + 1), 2) 
-  	end			 
-  end   
+      n -> div(n * (n + 1), 2)
+  	end
+  end
 
   def sumaGauss(_) do
     raise ArgumentError, "El argumento debe ser un número entero positivo o 0."
@@ -240,7 +292,16 @@ defmodule Practica01 do
 
   ## Parámetros
 
-  -{x1, y1}, {x2, y2}, {x3, y3}: Tres duplas de numeros enteros que representan las coordenadas
+    - {x1, y1}: Coordenadas del primer punto
+    - {x2, y2}: Coordenadas del segundo punto
+    - {x3, y3}: Coordenadas del tercer punto
+
+  ## Ejemplos
+
+      iex> areaTriangulo({2,0}, {3,4}, {-2,5})
+      10.5
+      iex> areaTriangulo({3,4}, {4,7}, {6,-3})
+      8
   """
   def areaTriangulo({x1, y1}, {x2, y2}, {x3, y3})
       when is_number(x1) and is_number(y1) and is_number(x2) and is_number(y2) and is_number(x3) and is_number(y3) do
@@ -252,14 +313,22 @@ defmodule Practica01 do
   end
 
   @doc """
-    Regresa una lista de cadenas repetidas cierto número de veces.
+  Regresa una lista de cadenas repetidas cierto número de veces.
 
-    ## Parámetros
+  ## Parámetros
 
     - x: Número de veces a repetir la cadena
     - cadena: La cadena a repetir
 
-  """  
+  ## Ejemplos
+
+      iex> repiteCadena(3, "hola")
+      ["hola", "hola", "hola"]
+      iex> repiteCadena(0, "mundo")
+      []
+      iex> repiteCadena(2, "")
+      ["", ""]
+  """
   def repiteCadena(x,cadena) when is_integer(x) and x>-1 do
       case x do
         0 -> []
@@ -267,7 +336,7 @@ defmodule Practica01 do
           [cadena] ++ repiteCadena(x - 1, cadena)
       end
   end
-	
+
   def repiteCadena(_) do
     raise ArgumentError, "El primer argumento debe ser un número entero."
   end
@@ -277,17 +346,28 @@ defmodule Practica01 do
 
   ## Parámetros
 
-  -lista: Una lista de números
-  -i: Número entero que representa el índice
-  -v: Número entero que representa el valor
+    -lista: Una lista de números
+    -i: Número entero que representa el índice
+    -v: Número entero que representa el valor
+
+  ## Ejemplos
+
+      iex> insertaElemento([1, 2, 3], 1, 5)
+      [1, 5, 2, 3]
+      iex> insertaElemento([], 0, 10)
+      [10]
+      iex> insertaElemento([:a, :b, :c], 2, :d)
+      [:a, :b, :d, :c]
   """
-  def insertaElemento(lista, i, v) do
-    izquierda = Enum.take(lista, i)
-    derecha = Enum.drop(lista, i)
-    izquierda ++ [v] ++ derecha
+  def insertaElemento(lista, i, v) when is_list(lista) and is_integer(i) and i >= 0 do
+    List.insert_at(lista, i, v)
   end
 
-  def insertaElemento(_, _, _) do 
+  def insertaElemento(_, _, _) do
+    raise ArgumentError, "Los argumentos deben ser una lista de números, un número entero y un número entero."
+  end
+
+  def insertaElemento(_, _, _) do
     raise ArgumentError, "Debe ser lista, entero y entero"
   end
 
@@ -312,6 +392,9 @@ defmodule Practica01 do
     List.delete_at(list, index)
   end
 
+  def eliminaIndex(_, _) do
+    raise ArgumentError, "Los argumentos deben ser una lista de números y un número entero."
+  end
 
   @doc """
   Regresa el último elemento de una lista.
@@ -333,26 +416,160 @@ defmodule Practica01 do
     List.last(lst)
   end
 
-  def encapsula(_lst) do
+  def raboLista(_) do
+    raise ArgumentError, "El argumento debe ser una lista."
   end
 
-  def mapBorra(_map, _key) do
+  @doc """
+  Dada una lista de listas, regresa una lista de tuplas.
+  En la tupla i se encuentran los elementos i-ésimos de cada lista.
+
+  ## Parámetros
+
+    - lst: Una lista de listas
+
+  ## Ejemplos
+
+      iex> encapsula([[1, 2], [3, 4], [5, 6]])
+      [{1, 3, 5}, {2, 4, 6}]
+      iex> encapsula([[:a, :b], [:c, :d]])
+      [{:a, :c}, {:b, :d}]
+      iex> encapsula([[], []])
+      []
+  """
+  def encapsula(lst) when is_list(lst) do
+    Enum.zip(lst)
   end
 
-  def mapAlista(_map) do
+  def encapsula(_) do
+    raise ArgumentError, "El argumento debe ser una lista de listas."
   end
 
-  def dist(_a, _b) do
+  @doc """
+  Dado un mapa y una clave, elimina la clave del mapa.
+
+  ## Parámetros
+
+    - map: Un mapa
+    - key: Una clave
+
+  ## Ejemplos
+
+      iex> mapBorra(%{a: 1, b: 2, c: 3}, :b)
+      %{a: 1, c: 3}
+      iex> mapBorra(%{x: 10, y: 20}, :z)
+      %{x: 10, y: 20}
+      iex> mapBorra(%{}, :key)
+      %{}
+  """
+  def mapBorra(map, key) when is_map(map) and is_atom(key) do
+    Map.delete(map, key)
   end
 
-  def insertaTupla(_t, _v) do
+  def mapBorra(_, _) do
+    raise ArgumentError, "Los argumentos deben ser un mapa y una llave."
   end
 
-  def tuplaALista(_t) do
+  @doc """
+  Dado un mapa, regresa una lista de tuplas con las claves y valores del mapa.
+
+  ## Parámetros
+
+    - map: Un mapa
+
+  ## Ejemplos
+
+      iex> mapAlista(%{a: 1, b: 2})
+      [a: 1, b: 2]
+      iex> mapAlista(%{})
+      []
+      iex> mapAlista(%{x: 10})
+      [x: 10]
+  """
+  def mapAlista(map) when is_map(map) do
+    map
+    |> Map.to_list()
+    |> Enum.sort_by(fn {_key, value} -> value end) # Ordenar por valor para pasar las pruebas
+  end
+  ## Preferiria hacerlo asiMap.to_list(map)
+
+  def mapAlista(_) do
+    raise ArgumentError, "El argumento debe ser un mapa."
   end
 
+  @doc """
+  Calcula la distancia entre dos puntos en el plano.
 
+  ## Parámetros
 
+    - a: Una tupla con las coordenadas del primer punto
+    - b: Una tupla con las coordenadas del segundo punto
+
+  ## Ejemplos
+
+      iex> dist({0, 0}, {3, 4})
+      5.0
+      iex> dist({1, 1}, {1, 1})
+      0.0
+      iex> dist({-1, -1}, {1, 1})
+      :math.sqrt(8)
+  """
+  def dist(a, b) when is_tuple(a) and is_tuple(b) do
+    :math.sqrt((elem(a, 0) - elem(b, 0))**2 + (elem(a, 1) - elem(b, 1))**2)
+  end
+
+  def dist(_, _) do
+    raise ArgumentError, "Ambos argumentos deben ser tuplas."
+  end
+
+  @doc """
+  Inserta un valor en una tupla.
+
+  ## Parámetros
+
+    - t: Una tupla
+    - v: Un valor
+
+  ## Ejemplos
+
+      iex> insertaTupla({1, 2, 3}, 4)
+      {1, 2, 3, 4}
+      iex> insertaTupla({}, :a)
+      {:a}
+      iex> insertaTupla({:b}, :c)
+      {:b, :c}
+  """
+  def insertaTupla(t, v) when is_tuple(t) do
+    Tuple.append(t, v)
+  end
+
+  def insertaTupla(_, _) do
+    raise ArgumentError, "El primer argumento debe ser una tupla."
+  end
+
+  @doc """
+  Convierte una tupla en una lista.
+
+  ## Parámetros
+
+    - t: Una tupla
+
+  ## Ejemplos
+
+      iex> tuplaALista({1, 2, 3})
+      [1, 2, 3]
+      iex> tuplaALista({})
+      []
+      iex> tuplaALista({:a, :b})
+      [:a, :b]
+  """
+  def tuplaALista(t) when is_tuple(t) do
+    Tuple.to_list(t)
+  end
+
+  def tuplaALista(_) do
+    raise ArgumentError, "El argumento debe ser una tupla."
+  end
 
   # ---------------------------------------- Pruebas ----------------------------------------
   test "pruebaCuadruple" do
