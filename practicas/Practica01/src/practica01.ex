@@ -54,7 +54,7 @@ defmodule Practica01 do
        x*4
   end
 
-  def cuadruple(_x) do
+  def cuadruple(_) do
     raise ArgumentError, "El argumento debe ser un número entero."
   end
 
@@ -79,7 +79,7 @@ defmodule Practica01 do
     x + 1
   end
 
-  def sucesor(_x) do
+  def sucesor(_) do
     raise ArgumentError, "El argumento debe ser un número entero."
   end
 
@@ -101,7 +101,7 @@ defmodule Practica01 do
       end
   end
 
-  def maximo(_x) do
+  def maximo(_) do
     raise ArgumentError, "Los argumentos deben ser dos número enteros."
   end
 
@@ -126,7 +126,7 @@ defmodule Practica01 do
     x + y
   end
 
-  def suma(_x, _y) do
+  def suma(_, _) do
     raise ArgumentError, "Ambos argumentos deben ser números enteros."
   end
 
@@ -143,7 +143,7 @@ defmodule Practica01 do
       x-y
   end
 
-  def resta(_x,_y) do
+  def resta(_,_) do
     raise ArgumentError, "Los argumentos deben ser dos número entero."
   end
 
@@ -160,7 +160,7 @@ defmodule Practica01 do
     (x + y) * (x - y)
   end
 
-  def multiplicacionConjugados(_x, _y) do
+  def multiplicacionConjugados(_, _) do
     raise ArgumentError, "Ambos argumentos deben ser números enteros."
   end
 
@@ -176,7 +176,7 @@ defmodule Practica01 do
       !x
   end
 
-  def negacion(_x) do
+  def negacion(_) do
     raise ArgumentError, "El argumento debe ser un booleano."
   end
 
@@ -193,7 +193,7 @@ defmodule Practica01 do
     x and y
   end
 
-  def conjuncion(_x, _y) do
+  def conjuncion(_, _) do
     raise ArgumentError, "Ambos argumentos deben ser booleanos."
   end
 
@@ -210,7 +210,7 @@ defmodule Practica01 do
       x || y
   end
 
-  def disyuncion(_x, _y) do
+  def disyuncion(_, _) do
     raise ArgumentError, "Ambos argumentos deben ser booleanos."
   end
 
@@ -230,7 +230,7 @@ defmodule Practica01 do
     end
   end
 
-  def absoluto(_x) do
+  def absoluto(_) do
     raise ArgumentError, "El argumento debe ser un número entero."
   end
 
@@ -246,7 +246,7 @@ defmodule Practica01 do
         3.14 * r * r
   end
 
-  def areaCirculo(_r) do
+  def areaCirculo(_) do
     raise ArgumentError, "El argumento debe ser un número entero positivo."
   end
 
@@ -264,7 +264,7 @@ defmodule Practica01 do
     n + sumaGaussRec(n - 1)
   end
 
-  def sumaGaussRec(_n) do
+  def sumaGaussRec(_) do
     raise ArgumentError, "El argumento debe ser un número entero positivo o 0."
   end
 
@@ -283,7 +283,7 @@ defmodule Practica01 do
   	end
   end
 
-  def sumaGauss(_n) do
+  def sumaGauss(_) do
     raise ArgumentError, "El argumento debe ser un número entero positivo o 0."
   end
 
@@ -308,7 +308,7 @@ defmodule Practica01 do
     abs(x1 * (y2 - y3) + x2 * (y3 - y1) + x3 * (y1 - y2)) / 2
   end
 
-  def areaTriangulo(_p1, _p2, _p3) do
+  def areaTriangulo(_, _, _) do
     raise ArgumentError, "Todos los puntos deben ser tuplas con números enteros."
   end
 
@@ -337,7 +337,7 @@ defmodule Practica01 do
       end
   end
 
-  def repiteCadena(_x) do
+  def repiteCadena(_) do
     raise ArgumentError, "El primer argumento debe ser un número entero."
   end
 
@@ -363,6 +363,10 @@ defmodule Practica01 do
     List.insert_at(lista, i, v)
   end
 
+  def insertaElemento(_, _, _) do
+    raise ArgumentError, "Los argumentos deben ser una lista de números, un número entero y un número entero."
+  end
+
   @doc """
   Elimina un elemento de una lista en el índice especificado.
 
@@ -384,6 +388,9 @@ defmodule Practica01 do
     List.delete_at(list, index)
   end
 
+  def eliminaIndex(_, _) do
+    raise ArgumentError, "Los argumentos deben ser una lista de números y un número entero."
+  end
 
   @doc """
   Regresa el último elemento de una lista.
@@ -403,6 +410,10 @@ defmodule Practica01 do
   """
   def raboLista(lst) when is_list(lst) do
     List.last(lst)
+  end
+
+  def raboLista(_) do
+    raise ArgumentError, "El argumento debe ser una lista."
   end
 
   @doc """
@@ -426,6 +437,10 @@ defmodule Practica01 do
     Enum.zip(lst)
   end
 
+  def encapsula(_) do
+    raise ArgumentError, "El argumento debe ser una lista de listas."
+  end
+
   @doc """
   Dado un mapa y una clave, elimina la clave del mapa.
 
@@ -445,6 +460,10 @@ defmodule Practica01 do
   """
   def mapBorra(map, key) when is_map(map) and is_atom(key) do
     Map.delete(map, key)
+  end
+
+  def mapBorra(_, _) do
+    raise ArgumentError, "Los argumentos deben ser un mapa y una llave."
   end
 
   @doc """
@@ -470,6 +489,9 @@ defmodule Practica01 do
   end
   ## Preferiria hacerlo asiMap.to_list(map)
 
+  def mapAlista(_) do
+    raise ArgumentError, "El argumento debe ser un mapa."
+  end
 
   @doc """
   Calcula la distancia entre dos puntos en el plano.
@@ -490,6 +512,10 @@ defmodule Practica01 do
   """
   def dist(a, b) when is_tuple(a) and is_tuple(b) do
     :math.sqrt((elem(a, 0) - elem(b, 0))**2 + (elem(a, 1) - elem(b, 1))**2)
+  end
+
+  def dist(_, _) do
+    raise ArgumentError, "Ambos argumentos deben ser tuplas."
   end
 
   @doc """
@@ -513,6 +539,10 @@ defmodule Practica01 do
     Tuple.append(t, v)
   end
 
+  def insertaTupla(_, _) do
+    raise ArgumentError, "El primer argumento debe ser una tupla."
+  end
+
   @doc """
   Convierte una tupla en una lista.
 
@@ -531,6 +561,10 @@ defmodule Practica01 do
   """
   def tuplaALista(t) when is_tuple(t) do
     Tuple.to_list(t)
+  end
+
+  def tuplaALista(_) do
+    raise ArgumentError, "El argumento debe ser una tupla."
   end
 
   # ---------------------------------------- Pruebas ----------------------------------------
