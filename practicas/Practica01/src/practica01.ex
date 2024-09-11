@@ -367,6 +367,10 @@ defmodule Practica01 do
     raise ArgumentError, "Los argumentos deben ser una lista de números, un número entero y un número entero."
   end
 
+  def insertaElemento(_, _, _) do
+    raise ArgumentError, "Debe ser lista, entero y entero"
+  end
+
   @doc """
   Elimina un elemento de una lista en el índice especificado.
 
