@@ -15,11 +15,14 @@ defmodule Practica01 do
       - x: Número entero
 
     """
-  def cuadruple(x) do
-    if is_integer(x) do
-      x*4
-    end
+  def cuadruple(x) when is_integer(x)  do
+       x*4
   end
+	  
+  def cuadruple(_x) do
+    raise ArgumentError, "El argumento debe ser un número entero."
+  end	  
+
 
   @doc """
    Devuelve el sucesor de un número entero.
@@ -46,16 +49,18 @@ defmodule Practica01 do
       - y: El segundo número a comparar
 
     """
-  def maximo(x,y) do
-    if is_integer(x) && is_integer(y) do
+  def maximo(x,y) when is_integer(x) and is_integer(y) do
       cond do
-        x>=y ->
+        x>=y -> 
             x
         x<y ->
             y
       end
-    end
   end
+  
+  def maximo(_x) do
+    raise ArgumentError, "Los argumentos deben ser dos número enteros."
+  end	
 
   @doc """
   Suma dos números enteros.
@@ -82,11 +87,14 @@ defmodule Practica01 do
       - y: El sustraendo
 
     """
-  def resta(x,y) do
-    if is_integer(x) && is_integer(y) do
-      x-y
-    end
+  def resta(x,y) when is_integer(x) and is_integer(y) do
+      x-y 
   end
+	  
+  def resta(_x,_y) do
+    raise ArgumentError, "Los argumentos deben ser dos número entero."
+  end	
+  
 
   @doc """
     Calcula la multiplicación de los conjugados de dos números enteros.
@@ -112,11 +120,14 @@ defmodule Practica01 do
       - x: Booleano a negar
 
     """
-  def negacion(x) do
-    if is_boolean(x) do
+  def negacion(x) when is_boolean(x) do
       !x
-    end
   end
+	  
+  def negacion(_x) do
+    raise ArgumentError, "El argumento debe ser un booleano."
+  end		  
+
 
   @doc """
   Realiza la conjunción lógica entre dos valores booleanos.
@@ -142,12 +153,15 @@ defmodule Practica01 do
       - x: Primer booleano
       - y: Segundo booleano
 
-    """
-  def disyuncion(x,y) do
-    if is_boolean(x) && is_boolean(y) do
+    """	  
+  def disyuncion(x,y) when is_boolean(x) and is_boolean(y)  do
       x || y
-    end
+  end 
+
+  def disyuncion(_x, _y) do
+    raise ArgumentError, "Ambos argumentos deben ser booleanos."
   end
+
 
   @doc """
   Devuelve el valor absoluto de un número entero.
@@ -176,11 +190,13 @@ defmodule Practica01 do
       - r: Número entero del radio de un círculo
 
     """
-  def areaCirculo(r) do
-    if is_integer(r) do
-       3.14 * r * r
-    end
- end
+  def areaCirculo(r) when  is_integer(r) and r>0 do  
+        3.14 * r * r
+  end
+
+  def areaCirculo(_r) do
+    raise ArgumentError, "El argumento debe ser un número entero positivo."
+  end
 
   @doc """
   Calcula la suma de Gauss de un número entero n de manera recursiva.
@@ -208,10 +224,15 @@ defmodule Practica01 do
       - n: Número entero a calcular la suma
 
     """
-  def sumaGauss(n) do
-    if is_integer(n) && is_integer(n) do
-      div(n * (n + 1), 2)
-    end
+  def sumaGauss(n) when is_integer(n) and n>-1 do
+  	case n do
+  		0 -> 0
+      n -> div(n * (n + 1), 2) 
+  	end			 
+  end   
+
+  def sumaGauss(_n) do
+    raise ArgumentError, "El argumento debe ser un número entero positivo o 0."
   end
 
   @doc """
@@ -238,15 +259,17 @@ defmodule Practica01 do
     - x: Número de veces a repetir la cadena
     - cadena: La cadena a repetir
 
-  """
-  def repiteCadena(x,cadena) do
-    if is_integer(x) do
+  """  
+  def repiteCadena(x,cadena) when is_integer(x) and x>-1 do
       case x do
         0 -> []
         x ->
           [cadena] ++ repiteCadena(x - 1, cadena)
       end
-    end
+  end
+	
+  def repiteCadena(_x) do
+    raise ArgumentError, "El primer argumento debe ser un número entero."
   end
 
   @doc """
