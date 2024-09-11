@@ -287,6 +287,10 @@ defmodule Practica01 do
     izquierda ++ [v] ++ derecha
   end
 
+  def insertaElemento(_, _, _) do 
+    raise ArgumentError, "Debe ser lista, entero y entero"
+  end
+
   @doc """
   Elimina un elemento de una lista en el índice especificado.
 
