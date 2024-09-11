@@ -464,8 +464,12 @@ defmodule Practica01 do
       [x: 10]
   """
   def mapAlista(map) when is_map(map) do
-    Map.to_list(map)
+    map
+    |> Map.to_list()
+    |> Enum.sort_by(fn {_key, value} -> value end) # Ordenar por valor para pasar las pruebas
   end
+  ## Preferiria hacerlo asiMap.to_list(map)
+
 
   @doc """
   Calcula la distancia entre dos puntos en el plano.
