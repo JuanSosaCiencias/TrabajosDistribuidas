@@ -19,7 +19,7 @@ defmodule Practica01 do
        x*4
   end
 	  
-  def cuadruple(_x) do
+  def cuadruple(_) do
     raise ArgumentError, "El argumento debe ser un número entero."
   end	  
 
@@ -36,7 +36,7 @@ defmodule Practica01 do
     x + 1
   end
 
-  def sucesor(_x) do
+  def sucesor(_) do
     raise ArgumentError, "El argumento debe ser un número entero."
   end
 
@@ -58,7 +58,7 @@ defmodule Practica01 do
       end
   end
   
-  def maximo(_x) do
+  def maximo(_) do
     raise ArgumentError, "Los argumentos deben ser dos número enteros."
   end	
 
@@ -74,7 +74,7 @@ defmodule Practica01 do
     x + y
   end
 
-  def suma(_x, _y) do
+  def suma(_, _) do
     raise ArgumentError, "Ambos argumentos deben ser números enteros."
   end
 
@@ -91,7 +91,7 @@ defmodule Practica01 do
       x-y 
   end
 	  
-  def resta(_x,_y) do
+  def resta(_,_) do
     raise ArgumentError, "Los argumentos deben ser dos número entero."
   end	
   
@@ -108,7 +108,7 @@ defmodule Practica01 do
     (x + y) * (x - y)
   end
 
-  def multiplicacionConjugados(_x, _y) do
+  def multiplicacionConjugados(_, _) do
     raise ArgumentError, "Ambos argumentos deben ser números enteros."
   end
 
@@ -124,7 +124,7 @@ defmodule Practica01 do
       !x
   end
 	  
-  def negacion(_x) do
+  def negacion(_) do
     raise ArgumentError, "El argumento debe ser un booleano."
   end		  
 
@@ -141,7 +141,7 @@ defmodule Practica01 do
     x and y
   end
 
-  def conjuncion(_x, _y) do
+  def conjuncion(_, _) do
     raise ArgumentError, "Ambos argumentos deben ser booleanos."
   end
 
@@ -158,7 +158,7 @@ defmodule Practica01 do
       x || y
   end 
 
-  def disyuncion(_x, _y) do
+  def disyuncion(_, _) do
     raise ArgumentError, "Ambos argumentos deben ser booleanos."
   end
 
@@ -178,7 +178,7 @@ defmodule Practica01 do
     end
   end
 
-  def absoluto(_x) do
+  def absoluto(_) do
     raise ArgumentError, "El argumento debe ser un número entero."
   end
 
@@ -194,7 +194,7 @@ defmodule Practica01 do
         3.14 * r * r
   end
 
-  def areaCirculo(_r) do
+  def areaCirculo(_) do
     raise ArgumentError, "El argumento debe ser un número entero positivo."
   end
 
@@ -212,7 +212,7 @@ defmodule Practica01 do
     n + sumaGaussRec(n - 1)
   end
 
-  def sumaGaussRec(_n) do
+  def sumaGaussRec(_) do
     raise ArgumentError, "El argumento debe ser un número entero positivo o 0."
   end
 
@@ -231,7 +231,7 @@ defmodule Practica01 do
   	end			 
   end   
 
-  def sumaGauss(_n) do
+  def sumaGauss(_) do
     raise ArgumentError, "El argumento debe ser un número entero positivo o 0."
   end
 
@@ -247,7 +247,7 @@ defmodule Practica01 do
     abs(x1 * (y2 - y3) + x2 * (y3 - y1) + x3 * (y1 - y2)) / 2
   end
 
-  def areaTriangulo(_p1, _p2, _p3) do
+  def areaTriangulo(_, _, _) do
     raise ArgumentError, "Todos los puntos deben ser tuplas con números enteros."
   end
 
@@ -268,7 +268,7 @@ defmodule Practica01 do
       end
   end
 	
-  def repiteCadena(_x) do
+  def repiteCadena(_) do
     raise ArgumentError, "El primer argumento debe ser un número entero."
   end
 
