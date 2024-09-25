@@ -3,6 +3,7 @@ defmodule Grafica do
   Módulo que representa gráficas con un sistema de mensajes entre procesadores.
   Selecciona al nodo con menor valor de ID como líder.
   """
+
   @doc """
   Inicia el proceso de la gráfica.
 
@@ -36,6 +37,7 @@ defmodule Grafica do
       recibe_mensaje(nuevo_estado)
     end
   end
+
   def procesa_mensaje({:id, id}, estado) do
     IO.puts("Proceso con PID #{inspect(self())}: Recibí mi ID #{id}")
     estado = Map.put(estado, :id, id)
@@ -142,13 +144,62 @@ defmodule Grafica do
   defp propaga_lider(nuevo_lider, vecinos, id) do
     IO.puts("Proceso con ID #{id}: Propagando el líder #{nuevo_lider} a todos mis vecinos y a mí mismo")
 
-    # Incluye al propio proceso en la lista de vecinos
+    # Contar cuántos mensajes se enviarán
+    cantidad_mensajes = length(vecinos) + 1  # Se incluye al proceso mismo
+
+    # Incrementa el contador por el número de mensajes enviados
+    Enum.each(1..cantidad_mensajes, fn _ -> ContadorMensajes.incrementar() end)
+
+    # Enviar el mensaje a todos los vecinos y al propio proceso
     Enum.each(vecinos ++ [self()], fn vecino -> send(vecino, {:mensaje, nuevo_lider}) end)
   end
 end
 
-# Se crean los procesos y se guardan sus PID.
+defmodule ContadorMensajes do
+  @moduledoc """
+  Módulo que cuenta el número de mensajes enviados.
+  Codigo 100% hecho por Copilot.
+  """
 
+  @doc """
+  Inicia el contador de mensajes.
+
+  ## Ejemplo
+  ```elixir
+  ContadorMensajes.iniciar()
+  ```
+  """
+  def iniciar() do
+    Agent.start_link(fn -> 0 end, name: __MODULE__)
+  end
+
+  @doc """
+  Incrementa el contador de mensajes en 1.
+
+  ## Ejemplo
+  ```elixir
+  ContadorMensajes.incrementar()
+  ```
+  """
+  def incrementar() do
+    Agent.update(__MODULE__, &(&1 + 1))
+  end
+
+  @doc """
+  Obtiene el valor actual del contador de mensajes.
+
+  ## Ejemplo
+  ```elixir
+  ContadorMensajes.obtener()
+  ```
+  """
+  def obtener() do
+    Agent.get(__MODULE__, & &1)
+  end
+end
+
+
+# Se crean los procesos y se guardan sus PID.
 t = spawn(Grafica, :inicia, [])
 u = spawn(Grafica, :inicia, [])
 v = spawn(Grafica, :inicia, [])
@@ -160,7 +211,6 @@ z = spawn(Grafica, :inicia, [])
 s = spawn(Grafica, :inicia, [])
 q = spawn(Grafica, :inicia, [])
 r = spawn(Grafica, :inicia, [])
-
 
 # A cada proceso le enviamos su identificador
 send(t, {:id, 20})
@@ -175,10 +225,6 @@ send(s, {:id, 19})
 send(q, {:id, 17})
 send(r, {:id, 18})
 
-
-
-
-
 # A cada proceso le enviamos sus vecinos
 send(t, {:vecinos, [x, w]})
 send(u, {:vecinos, [y]})
@@ -192,12 +238,13 @@ send(q, {:vecinos, [s]})
 send(r, {:vecinos, [s]})
 send(s, {:vecinos, [q,r]})
 
-
 # Iniciamos la propagación de forma asíncrona
-
 IO.puts("----------------")
 IO.puts("Iniciando propagación")
 IO.puts("----------------")
+
+# Iniciar el contador de mensajes
+ContadorMensajes.iniciar()
 
 # Propagación asincrónica: Cada proceso comenzará en orden.
 send(t, {:inicia})
@@ -213,7 +260,7 @@ send(q, {:inicia})
 send(r, {:inicia})
 
 # Verificación del líder en cada nodo.
-Process.sleep(2000)
+Process.sleep(1000)
 IO.puts("----------------")
 IO.puts("Verificando elección de líder")
 IO.puts("----------------")
@@ -229,3 +276,9 @@ send(z, {:ya})
 send(s, {:ya})
 send(q, {:ya})
 send(r, {:ya})
+
+# Obtener el total de mensajes enviados (Extra) esta entre 60 y 80 mensajes. O(|E|*|V|)
+Process.sleep(1000)
+IO.puts("----------------")
+IO.puts("Total de mensajes enviados: #{ContadorMensajes.obtener()}")
+IO.puts("----------------")
