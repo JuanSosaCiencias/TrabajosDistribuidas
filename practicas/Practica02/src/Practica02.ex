@@ -91,6 +91,11 @@ x = spawn(Grafica, :inicia, [])
 y = spawn(Grafica, :inicia, [])  
 z = spawn(Grafica, :inicia, [])  
 
+s = spawn(Grafica, :inicia, [])  
+q = spawn(Grafica, :inicia, [])  
+r = spawn(Grafica, :inicia, [])  
+
+
 # A cada proceso le enviamos su identificador
 send(t, {:id, 20})
 send(u, {:id, 21})
@@ -99,6 +104,14 @@ send(w, {:id, 23})
 send(x, {:id, 24})
 send(y, {:id, 25})
 send(z, {:id, 26})
+
+send(s, {:id, 19})
+send(q, {:id, 17})
+send(r, {:id, 18})
+
+
+
+
 
 # A cada proceso le enviamos sus vecinos
 send(t, {:vecinos, [x, w]})  
@@ -109,6 +122,11 @@ send(x, {:vecinos, [t, v, w, y]})
 send(y, {:vecinos, [x, z, u]})
 send(z, {:vecinos, [y]})
 
+send(q, {:vecinos, [s]})
+send(r, {:vecinos, [s]})
+send(s, {:vecinos, [q,r]})
+
+
 # Iniciamos la propagación de forma asíncrona
 
 IO.puts("----------------")  
@@ -117,18 +135,16 @@ IO.puts("----------------")
 
 # Propagación asincrónica: Cada proceso comenzará en orden.
 send(t, {:inicia})
-Process.sleep(1000)  
 send(u, {:inicia})
-Process.sleep(1000)
 send(v, {:inicia})
-Process.sleep(1000)
 send(w, {:inicia})
-Process.sleep(1000)
 send(x, {:inicia})
-Process.sleep(1000)
 send(y, {:inicia})
-Process.sleep(1000)
 send(z, {:inicia})
+
+send(s, {:inicia})
+send(q, {:inicia})
+send(r, {:inicia})
 
 # Verificación del líder en cada nodo.
 Process.sleep(2000)
@@ -143,3 +159,7 @@ send(w, {:ya})
 send(x, {:ya})
 send(y, {:ya})
 send(z, {:ya})
+
+send(s, {:ya})
+send(q, {:ya})
+send(r, {:ya})
