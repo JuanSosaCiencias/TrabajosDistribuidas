@@ -1,3 +1,1 @@
-rm *.beam
-elixirc Practica03.ex
-elixirc p03_test.ex
+iex -r Practica03.ex
