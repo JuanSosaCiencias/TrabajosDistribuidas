@@ -1,0 +1,87 @@
+%----- Configuración del estilo del documento------%
+\documentclass{report}
+\usepackage[utf8]{inputenc}
+
+%----- Paquete para algunos fonts ------%
+\usepackage[T1]{fontenc}
+
+%----- Paquete para configurar los márgenes del documento ------%
+\usepackage[left=2.5cm,right=2.5cm,top=1.8cm,bottom=2.3cm]{geometry}
+
+%----- Paquete para imagenes ------%
+\usepackage{graphicx}
+
+% ----- Paquete para matemáticas ------%
+\usepackage{amsmath,amssymb,amsthm}
+
+%----- Paquete para encabezados,pies de pagina y tabla de contenidos ------%
+\usepackage{fancyhdr,lastpage,tocloft}
+
+%----- Estilo personalizado para mi tabla de contenido ------%  
+\renewcommand{\cfttoctitlefont}{\LARGE\bfseries}
+\renewcommand{\cftchapfont}{\large\bfseries}
+\renewcommand{\cftsecfont}{\normalsize\itshape}
+\setlength{\cftbeforechapskip}{1em}
+\setlength{\cftbeforesecskip}{0.5em}
+\renewcommand{\cftchapleader}{\cftdotfill{\cftdotsep}}
+
+%----- Paquete para tablas ------%
+\usepackage[shortlabels]{enumitem}
+
+%----- Paquete para hipervinculos ------%
+\usepackage{hyperref}
+
+%------ Paquetes para color ------------%
+\usepackage{xcolor}
+
+% ------ Paquetes para la bibliografía ------%
+\usepackage[backend=biber]{biblatex}
+\addbibresource{resources/referencias/referencias.bib}
+\usepackage{csquotes}
+
+
+\begin{document}
+    \input{portada.tex} % Portada del documento
+
+    % Índice
+    \tableofcontents
+
+    % Explicar el problema
+    \chapter{\LARGE{Planteamiento del problema}}
+    \input{resources/Chapters/Planteamiento/Planteamiento.tex}
+
+
+    % Explicar la solución propuesta
+    \chapter{\LARGE{Solución propuesta}}
+
+    \section{\Large{Flujo general de la solución}}
+    \input{resources/Chapters/Solucion/Flujo.tex}
+
+    \section{\Large{Consenso}}
+    \input{resources/Chapters/Solucion/Consenso.tex}
+
+    \section{\Large{Módulos y sus funciones}}
+    \input{resources/Chapters/Solucion/Modulos.tex}
+    
+    % Resultados
+    \chapter{\LARGE{Resultados}}
+
+    \section{\Large{Implementación}}
+    \input{resources/Chapters/Resultados/resultados.tex}
+
+    \section{\Large{Pruebas}}
+    \input{resources/Chapters/Resultados/pruebas.tex}
+
+    \section{\Large{Notas de los resultados}}
+    \input{resources/Chapters/Resultados/notas.tex}
+
+    % Conclusiones
+    \chapter{\LARGE{Conclusiones}}
+    \input{resources/Chapters/Conclusiones/conclusiones.tex}
+
+    % Bibliografía
+    \newpage  
+    \chapter*{Referencias}
+    \addcontentsline{toc}{chapter}{Referencias}
+    \printbibliography
+\end{document}
