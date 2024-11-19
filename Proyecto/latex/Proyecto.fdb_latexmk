@@ -1,12 +1,12 @@
 # Fdb version 4
-["biber Proyecto"] 1731963666 "Proyecto.bcf" "Proyecto.bbl" "Proyecto" 1731965183 0
+["biber Proyecto"] 1731963666 "Proyecto.bcf" "Proyecto.bbl" "Proyecto" 1731973872 0
   "./resources/referencias/referencias.bib" 1731956926 135 43f4dd9643b53ca2debf4359d1aa585e ""
-  "Proyecto.bcf" 1731965183 107212 338b4d33c50b6e8b186a6c9f2846b549 "pdflatex"
+  "Proyecto.bcf" 1731973872 107212 338b4d33c50b6e8b186a6c9f2846b549 "pdflatex"
   (generated)
   "Proyecto.bbl"
   "Proyecto.blg"
   (rewritten before read)
-["pdflatex"] 1731965182 "/home/jsr_mario/Documents/Escuela/Semestre_5/Distribuida/TrabajosDistribuidas/Proyecto/latex/Proyecto.tex" "Proyecto.pdf" "Proyecto" 1731965183 0
+["pdflatex"] 1731973871 "/home/jsr_mario/Documents/Escuela/Semestre_5/Distribuida/TrabajosDistribuidas/Proyecto/latex/Proyecto.tex" "Proyecto.pdf" "Proyecto" 1731973872 0
   "/etc/texmf/web2c/texmf.cnf" 1725292753 475 c0e671620eb5563b2130f56340a5fde8 ""
   "/home/jsr_mario/Documents/Escuela/Semestre_5/Distribuida/TrabajosDistribuidas/Proyecto/latex/Proyecto.tex" 1731965180 2477 c895ecf096fcb4ec9efa7225df152f4d ""
   "/usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
@@ -159,12 +159,12 @@
   "/usr/share/texmf/web2c/texmf.cnf" 1681034085 39561 34c98e380bf7c7201ee6a7909aff625a ""
   "/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map" 1725292770 4623455 fa0568a71dd9a288d6c226ee477506c6 ""
   "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1725292831 7882642 d604e976abf4089c053e6d6ecd7b8688 ""
-  "Proyecto.aux" 1731965183 2424 cbe8d9c1394a2f428ca2f0450435b8ce "pdflatex"
+  "Proyecto.aux" 1731973872 2424 a51d0a96fa17f40629a6382a52977384 "pdflatex"
   "Proyecto.bbl" 1731963666 466 ee04f40f768daeed26442158e95aba61 "biber Proyecto"
-  "Proyecto.out" 1731965183 1493 2712712a2e4a22d210e3e553c1830e95 "pdflatex"
-  "Proyecto.run.xml" 1731965183 2356 a59e7b8f2aeb989419c65c357f4cc067 "pdflatex"
+  "Proyecto.out" 1731973872 1493 ce15d30dbf123ded5eaf33c1ab3e2513 "pdflatex"
+  "Proyecto.run.xml" 1731973872 2356 a59e7b8f2aeb989419c65c357f4cc067 "pdflatex"
   "Proyecto.tex" 1731965180 2477 c895ecf096fcb4ec9efa7225df152f4d ""
-  "Proyecto.toc" 1731965183 900 ea63a00de6d2ffde4bd3d526828edc23 "pdflatex"
+  "Proyecto.toc" 1731973872 900 6437c2f8a0c0902779818bee73e29672 "pdflatex"
   "portada.tex" 1731958246 1931 629d765d67daca843c0c62f6cc8b0fdb ""
   "resources/Chapters/Conclusiones/conclusiones.tex" 1731965169 0 d41d8cd98f00b204e9800998ecf8427e ""
   "resources/Chapters/Planteamiento/Planteamiento.tex" 1731963189 2725 fb5ce52ae8d0b8867c0633fae1ac6c1c ""
@@ -172,7 +172,7 @@
   "resources/Chapters/Resultados/pruebas.tex" 1731965094 0 d41d8cd98f00b204e9800998ecf8427e ""
   "resources/Chapters/Resultados/resultados.tex" 1731964978 0 d41d8cd98f00b204e9800998ecf8427e ""
   "resources/Chapters/Solucion/Consenso.tex" 1731963379 0 d41d8cd98f00b204e9800998ecf8427e ""
-  "resources/Chapters/Solucion/Flujo.tex" 1731964770 9088 0a5b7404896edd55d3b66a768af531de ""
+  "resources/Chapters/Solucion/Flujo.tex" 1731973870 9039 ad76eaf45861a9777683666ff28b5bf8 ""
   "resources/Chapters/Solucion/Modulos.tex" 1731963379 0 d41d8cd98f00b204e9800998ecf8427e ""
   "resources/Logo_FC.png" 1731956926 624736 9f1de437b11dbb3af694275361eb0028 ""
   "resources/Logo_UNAM.png" 1731956926 284641 bd0670d95026b4d8545a74884b2e7ecb ""
