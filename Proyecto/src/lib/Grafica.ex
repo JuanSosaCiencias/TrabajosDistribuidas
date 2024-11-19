@@ -1,5 +1,3 @@
-# -------- Módulo Grafica --------
-
 defmodule Grafica do
   @moduledoc """
   Módulo de red distribuida para implementar consenso y elección de líder.
@@ -8,99 +6,103 @@ defmodule Grafica do
   @doc """
   Inicia un nodo con el estado inicial especificado.
   """
-  def inicia(estado_inicial \\ %{:visitado => false, :id => -1, :lider => nil, :vecinos => [], :valor => nil}) do
+  def inicia(estado_inicial) do
+    Process.put(:estado_inicial, estado_inicial)
+    IO.puts("Proceso con PID #{inspect(self())}: Nodo iniciado con estado #{inspect(estado_inicial)}")
     recibe_mensaje(estado_inicial)
   end
 
+  defp valida_bloque(bloque, %{blockchain: blockchain}) do
+    last_block = List.last(blockchain.chain)
+    Block.valid?(bloque, last_block)
+  end
+
   @doc """
-  Recibe y procesa mensajes, actualizando el estado del nodo.
+  Procesa mensajes, diferenciando nodos bizantinos de nodos honestos.
   """
   def recibe_mensaje(estado) do
     receive do
-      mensaje ->
-        {:ok, nuevo_estado} = procesa_mensaje(mensaje, estado)
-        recibe_mensaje(nuevo_estado)
+      {:propuesta, pid_origen, bloque} ->
+        IO.puts("Nodo #{inspect(self())} recibió una propuesta de #{inspect(pid_origen)}")
+
+        if valida_bloque(bloque, estado) do
+          IO.puts("Nodo #{inspect(self())}: Propuesta válida. Actualizando bloque actual.")
+          estado = Map.put(estado, :bloque_actual, bloque)  # Actualizar el bloque actual
+
+          # Enviar mensaje de preparación a los vecinos
+          Enum.each(estado[:vecinos], fn vecino ->
+            send(vecino, {:prepare, self(), bloque})
+          end)
+        else
+          IO.puts("Nodo #{inspect(self())}: Propuesta inválida. Ignorando.")
+        end
+        recibe_mensaje(estado)
+
+      {:prepare, pid_origen, bloque} ->
+        IO.puts("Nodo #{inspect(self())} recibió un PREPARE de #{inspect(pid_origen)} para el bloque #{inspect(bloque)}")
+
+        if Enum.member?(estado[:vecinos], pid_origen) do
+          if valida_bloque(bloque, estado) do
+            IO.puts("Nodo #{inspect(self())}: PREPARE válido. Actualizando bloque actual.")
+            estado = Map.put(estado, :bloque_actual, bloque)  # Actualizar el bloque actual
+            IO.puts("Nodo #{inspect(self())} estado actualizado: #{inspect(estado)}")
+            # Enviar voto positivo al origen
+            send(pid_origen, {:voto, self(), true})
+          else
+            IO.puts("Nodo #{inspect(self())}: PREPARE inválido. Enviando voto negativo.")
+            send(pid_origen, {:voto, self(), false})
+          end
+        else
+          IO.puts("Error: Nodo #{inspect(pid_origen)} no es un vecino conocido")
+        end
+        recibe_mensaje(estado)
+
+      {:voto, pid_origen, voto_valido} ->
+        IO.puts("Nodo #{inspect(self())} recibió un voto #{voto_valido} de #{inspect(pid_origen)}")
+
+        votos = Map.update(estado[:votos], voto_valido, [pid_origen], fn lista -> [pid_origen | lista] end)
+        estado = Map.put(estado, :votos, votos)
+
+        IO.puts("Nodo #{inspect(self())}: Votos actuales: #{inspect(votos)} para el bloque #{inspect(estado[:bloque_actual])}")
+
+        # Revisar si hay quórum
+        if estado[:bloque_actual] and length(Map.get(votos, true, [])) > div(length(estado[:vecinos]), 2) do
+          IO.puts("Nodo #{inspect(self())}: Quórum alcanzado para el bloque #{inspect(estado[:bloque_actual])}")
+          # Realizar las acciones necesarias tras alcanzar el quórum
+        end
+        # Pasar el estado actualizado a la siguiente llamada
+        recibe_mensaje(estado)
+
+
+      {:commit, bloque} ->
+        IO.puts("Nodo #{inspect(self())} recibió un COMMIT para el bloque #{inspect(bloque)}")
+
+        votos = Map.get(estado, :votos_commit, %{})
+        votos = Map.update(votos, bloque, 1, &(&1 + 1))
+        estado = Map.put(estado, :votos_commit, votos)
+
+        if Map.get(votos, bloque, 0) > div(length(estado[:vecinos]) * 2, 3) do
+          IO.puts("Nodo #{inspect(self())}: Quórum alcanzado en COMMIT. Añadiendo bloque a la blockchain.")
+          {new_blockchain, nuevo_bloque_actual} =
+            Blockchain.insert_and_return_block(estado[:blockchain], bloque)
+
+          estado =
+            estado
+            |> Map.put(:blockchain, new_blockchain)
+            |> Map.put(:bloque_actual, nuevo_bloque_actual)
+        end
+
+        recibe_mensaje(estado)
+
+      {:vecinos, vecinos} ->
+        IO.puts("Nodo #{inspect(self())} actualizando vecinos: #{inspect(vecinos)}")
+        estado = Map.put(estado, :vecinos, vecinos)
+        IO.puts("Nodo #{inspect(self())} estado actualizado: #{inspect(estado)}")
+        recibe_mensaje(estado)
+
+      # _ ->
+      #   IO.puts("Proceso con PID #{inspect(self())}: Recibí un mensaje desconocido")
+      #   recibe_mensaje(estado)
     end
-  end
-
-  @doc """
-  Procesa el mensaje de asignación de ID, lista de sus vecinos, valor propuesto, consenso.
-  """
-  def procesa_mensaje({:id, id}, estado) when is_integer(id) do
-    IO.puts("Proceso con PID #{inspect(self())}: Recibí mi ID #{id}")
-    estado = Map.put(estado, :id, id)
-    {:ok, estado}
-  end
-
-  def procesa_mensaje({:vecinos, vecinos}, estado) when is_list(vecinos) do
-    IO.puts("Proceso con PID #{inspect(self())}: Recibí mis vecinos: #{inspect(vecinos)}")
-    estado = Map.put(estado, :vecinos, vecinos)
-    {:ok, estado}
-  end
-
-  def procesa_mensaje({:proponer, valor}, estado) when is_integer(valor) do
-    IO.puts("Proceso con PID #{inspect(self())}: Proponiendo valor #{valor}")
-    estado = Map.put(estado, :valor, valor)
-    propaga_valor(valor, estado[:vecinos])
-    {:ok, estado}
-  end
-
-  def procesa_mensaje({:consensuar, valor_recibido}, estado) when is_integer(valor_recibido) do
-    IO.puts("Proceso con PID #{inspect(self())}: Recibí valor para consensuar #{valor_recibido}")
-    valor_actual = estado[:valor] || valor_recibido
-    # -- Criterio para el consenso
-    nuevo_valor = min(valor_actual, valor_recibido)
-    estado = Map.put(estado, :valor, nuevo_valor)
-    {:ok, estado}
-  end
-
-  def procesa_mensaje({:comprobar}, estado) do
-    IO.puts("Proceso con PID #{inspect(self())}: Valor consensuado final es #{estado[:valor]}")
-    {:ok, estado}
-  end
-
-  def procesa_mensaje({:mensaje, n_id}, estado) when is_integer(n_id) do
-    IO.puts("Proceso con PID #{inspect(self())}: Recibí mensaje de mi vecino con ID #{n_id}")
-    %{:id => id, :lider => lider_actual} = estado
-
-    if n_id < (lider_actual || id) do
-      IO.puts("Proceso con ID #{id}: Actualizando líder a #{n_id}")
-      estado = Map.put(estado, :lider, n_id)
-      propaga_lider(n_id, estado[:vecinos], id)
-      {:ok, estado}
-    else
-      {:ok, estado}
-    end
-  end
-
-  def procesa_mensaje({:inicia}, estado) do
-    IO.puts("Proceso con PID #{inspect(self())}: Iniciando y propagando mi ID")
-    %{:id => id, :vecinos => vecinos, :lider => lider} = estado
-    lider = if lider == nil, do: id, else: lider
-    estado = Map.put(estado, :lider, lider)
-    propaga_lider(lider, vecinos, id)
-    {:ok, estado}
-  end
-
-  def procesa_mensaje({:ya}, estado) do
-    %{:id => id, :lider => lider} = estado
-    if lider == id do
-      IO.puts("Proceso con ID #{id}: Soy el líder")
-    else
-      IO.puts("Proceso con ID #{id}: El líder es #{lider}")
-    end
-    {:ok, estado}
-  end
-
-  # Propaga el valor propuesto a todos los vecinos para el consenso.
-  defp propaga_valor(valor, vecinos) when is_list(vecinos) do
-    Enum.each(vecinos, fn vecino -> send(vecino, {:consensuar, valor}) end)
-  end
-
-  # Propaga el líder propuesto a todos los vecinos.
-  defp propaga_lider(nuevo_lider, vecinos, _id) when is_integer(nuevo_lider) and is_list(vecinos) do
-    Enum.each(vecinos ++ [self()], fn vecino -> send(vecino, {:mensaje, nuevo_lider}) end)
   end
 end
-
-# --------end --------
