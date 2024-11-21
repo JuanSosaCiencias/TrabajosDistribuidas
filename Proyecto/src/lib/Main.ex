@@ -31,16 +31,14 @@ defmodule Main do
     IO.puts("Blockchain inicial creada. Ejecutando PBFT...")
     IO.puts("----------------")
 
-    # 4. Asignar el estado inicial a los nodos
-    Enum.each(procesos, fn proceso ->
-      send(proceso, {:estado_inicial, %{
-        blockchain: blockchain,           # Asumiendo que blockchain está definido en otro lugar
-        vecinos: [],                      # Lista vacía de vecinos por defecto
-        bizantino: false                  # Valor de 'false' para nodo honesto
-      }})
-    end)
-
-
+    # # 4. Asignar el estado inicial a los nodos
+    # Enum.each(procesos, fn proceso ->
+    #   send(proceso, {:estado_inicial, %{
+    #     blockchain: blockchain,
+    #     vecinos: [],                      # Lista vacía de vecinos por defecto
+    #     bizantino: false                  # Valor de 'false' para nodo honesto
+    #   }})
+    # end)
 
     # 5. Seleccionar líder honesto
     lider = seleccionar_lider_honesto(procesos)
@@ -49,7 +47,6 @@ defmodule Main do
       IO.puts("Error: No se pudo seleccionar un líder honesto.")
       blockchain
     end
-
     IO.puts("Líder seleccionado: #{inspect(lider)}")
 
     # 6. Bloque propuesto por el líder
@@ -177,9 +174,9 @@ end
 
 # -------- Módulo NodoHonesto --------
 defmodule NodoHonesto do
-  def inicia(vecinos \\ []) do
+  def inicia() do
     Grafica.inicia(%{
-      vecinos: vecinos,               # Lista de PIDs de vecinos
+      vecinos: [],               # Lista de PIDs de vecinos
       bizantino: false,               # Nodo honesto
       blockchain: Blockchain.new(),   # Inicializa blockchain vacío o existente
       bloque_actual: nil,             # No hay bloque en propuesta al inicio
@@ -190,9 +187,9 @@ end
 
 # -------- Módulo NodoBizantino --------
 defmodule NodoBizantino do
-  def inicia(vecinos \\ []) do
+  def inicia() do
     Grafica.inicia(%{
-      vecinos: vecinos,               # Lista de PIDs de vecinos
+      vecinos: [],               # Lista de PIDs de vecinos
       bizantino: true,                # Nodo bizantino
       blockchain: Blockchain.new(),   # Inicializa blockchain vacío o existente
       bloque_actual: nil,             # No hay bloque en propuesta al inicio

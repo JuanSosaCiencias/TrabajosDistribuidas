@@ -19,8 +19,9 @@ defmodule Block do
     hash == Crypto.hash(block)
   end
 
-  def valid?(%Block{hash: current_hash} = current_block, %Block{hash: prev_hash} = _previous_block) do
-    current_block.prev_hash == prev_hash and current_hash == Crypto.hash(current_block)
+  defp valida_bloque(%Block{} = bloque, %{blockchain: blockchain}) do
+    last_block = List.last(blockchain.chain)
+    bloque.prev_hash == last_block.hash and Block.valid?(bloque, last_block)
   end
 end
 

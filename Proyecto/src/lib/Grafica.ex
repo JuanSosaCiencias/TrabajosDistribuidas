@@ -58,6 +58,7 @@ defmodule Grafica do
         recibe_mensaje(estado)
 
       {:voto, pid_origen, voto_valido} ->
+        IO.puts("Nodo #{inspect(self())} estado actualizado: #{inspect(estado)}")
         IO.puts("Nodo #{inspect(self())} recibió un voto #{voto_valido} de #{inspect(pid_origen)}")
 
         votos = Map.update(estado[:votos], voto_valido, [pid_origen], fn lista -> [pid_origen | lista] end)
@@ -99,6 +100,21 @@ defmodule Grafica do
         estado = Map.put(estado, :vecinos, vecinos)
         IO.puts("Nodo #{inspect(self())} estado actualizado: #{inspect(estado)}")
         recibe_mensaje(estado)
+
+      {:nuevo_bloque, data} ->
+        {blockchain_actualizada, nuevo_bloque} = Blockchain.insert_and_return_block(estado.blockchain, data)
+        estado = Map.put(estado, :blockchain, blockchain_actualizada)
+        estado = Map.put(estado, :bloque_actual, nuevo_bloque)
+
+        IO.puts("Nodo #{inspect(self())}: Bloque #{inspect(nuevo_bloque)} insertado en la blockchain.")
+
+        # Propagar propuesta a los vecinos
+        Enum.each(estado.vecinos, fn vecino ->
+          send(vecino, {:propuesta, self(), nuevo_bloque})
+        end)
+
+        recibe_mensaje(estado)
+
 
       # _ ->
       #   IO.puts("Proceso con PID #{inspect(self())}: Recibí un mensaje desconocido")
