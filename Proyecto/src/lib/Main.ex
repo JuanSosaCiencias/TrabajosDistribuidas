@@ -7,44 +7,45 @@ defmodule Main do
 
   @doc """
   Función principal que inicializa la red de `n` nodos y `f` procesos bizantinos.
+
+  NOTA: Aun no se ha implementado la lógica de consenso, ni validación de bloques, ni propagación de mensajes, ni blockchain real, solo crea los nodos y crea la grafica
   """
   def run(n, f) do
     IO.puts("Iniciando la red con #{n} nodos, incluyendo #{f} procesos bizantinos...")
 
-    procesos = crea_nodos(n, f)  # Corrige esta línea si corresponde
+    procesos = crea_nodos(n, f)
+
+    Process.sleep(1000)  # Esperar a que los nodos se inicialicen
+    IO.puts("\n Nodos inicializados. Asignando vecinos... \n")
+
     vecinos = asigna_vecinos(procesos)
 
-    # Uso de otras funciones
-    # inicializa_nodos(procesos)
-    # simular_transacciones(procesos)
-
-    Enum.each(procesos, fn proceso ->
-      IO.inspect(proceso)
-    end)
+    Process.sleep(1000)  # Esperar a que los nodos se inicialicen
+    IO.puts("\n Vecinos asignados ... \n")
 
     vecinos
   end
 
 
-
+  @doc """
+  Crea `n` nodos, incluyendo `f` procesos bizantinos.
+  """
   defp crea_nodos(n, f) do
     # Crear `f` procesos bizantinos y `n - f` procesos honestos
     bizantinos = for _ <- 1..f, do: spawn(NodoBizantino, :inicia, [])
     honestos = for _ <- 1..(n - f), do: spawn(NodoHonesto, :inicia, [])
-
     bizantinos ++ honestos
   end
 
-  # """
-  # Asigna vecinos a los nodos siguiendo el modelo de Watts y Strogatz.
-  # Garantiza un coeficiente de agrupamiento > 0.4.
-  # """
+  @doc """
+  Asigna vecinos a los nodos de la red. Se asegura de que el coeficiente de agrupamiento sea mayor a 0.4.
+  """
   defp asigna_vecinos(procesos) do
     n = length(procesos)
     k = max(2, div(n, 4))  # Ajuste para definir la cantidad de vecinos
 
-    # Paso 1: Conexiones iniciales (nodos en anillo con k vecinos)
-    vecinos = for i <- 0..(n - 1) do
+    # Paso 1: Crear conexiones iniciales (nodos en anillo con k vecinos)
+    vecinos_iniciales = for i <- 0..(n - 1) do
       Enum.flat_map(1..div(k, 2), fn offset ->
         [
           Enum.at(procesos, rem(i + offset, n)),       # Acceso seguro a elementos usando Enum.at/2
@@ -53,68 +54,116 @@ defmodule Main do
       end)
     end
 
-    # Paso 2: Reenlaces aleatorios
-    probabilidad_reenlace = 0.1  # Probabilidad de reenlace para aleatoriedad
+    # Hacer las conexiones bidireccionales
+    vecinos_bidireccionales = Enum.reduce(0..(n - 1), vecinos_iniciales, fn i, acc ->
+      Enum.reduce(Enum.at(acc, i), acc, fn vecino, acc_inner ->
+        vecino_idx = Enum.find_index(procesos, fn p -> p == vecino end)
+
+        # Agregar bidireccionalidad
+        vecinos_actualizados =
+          Enum.uniq(Enum.at(acc_inner, vecino_idx) ++ [Enum.at(procesos, i)])
+
+        List.replace_at(acc_inner, vecino_idx, vecinos_actualizados)
+      end)
+    end)
+
+    # Paso 2: Aplicar probabilidad de reenlace aleatorio
+    probabilidad_reenlace = 0.1
     vecinos_random = Enum.map(0..(n - 1), fn i ->
-      Enum.map(vecinos |> Enum.at(i), fn vecino ->
+      Enum.map(Enum.at(vecinos_bidireccionales, i), fn vecino ->
         if :rand.uniform() < probabilidad_reenlace do
-          Enum.random(procesos -- [Enum.at(procesos, i) | vecinos |> Enum.at(i)])
+          Enum.random(procesos -- [Enum.at(procesos, i) | Enum.at(vecinos_bidireccionales, i)])
         else
           vecino
         end
       end)
     end)
 
-    # Asignar los vecinos a los procesos
-    Enum.each(0..(n - 1), fn i ->
-      send(Enum.at(procesos, i), {:vecinos, Enum.at(vecinos_random, i)})
+    # Hacer los vecinos bidireccionales tras reenlace
+    vecinos_finales = Enum.reduce(0..(n - 1), vecinos_random, fn i, acc ->
+      Enum.reduce(Enum.at(acc, i), acc, fn vecino, acc_inner ->
+        vecino_idx = Enum.find_index(procesos, fn p -> p == vecino end)
+
+        vecinos_actualizados =
+          Enum.uniq(Enum.at(acc_inner, vecino_idx) ++ [Enum.at(procesos, i)])
+
+        List.replace_at(acc_inner, vecino_idx, vecinos_actualizados)
+      end)
     end)
+
+    # Paso 3: Verificar coeficiente de agrupamiento
+    if clustering_coefficient(vecinos_finales, procesos) < 0.4 do
+      asigna_vecinos(procesos)  # Reintentar si no cumple
+    else
+      # Asignar los vecinos a los procesos
+      Enum.each(0..(n - 1), fn i ->
+        send(Enum.at(procesos, i), {:vecinos, Enum.at(vecinos_finales, i)})
+      end)
+    end
   end
 
-  # defp inicializa_nodos(red) do
-  #   Enum.each(red, fn {proceso, _} ->
-  #     send(proceso, {:inicia})
-  #   end)
-  # end
+  # Función para calcular el coeficiente de agrupamiento
+  defp clustering_coefficient(vecinos, procesos) do
+    n = length(vecinos)
 
-  # defp simular_transacciones(red) do
-  #   # Simulación de transacciones y consenso en la red
-  #   # Este es un lugar donde se puede implementar la lógica de generación de bloques y votaciones
-  #   Enum.each(red, fn {proceso, _} ->
-  #     send(proceso, {:proponer, "Transacción de prueba"})
-  #   end)
+    clustering_sum =
+      Enum.reduce(0..(n - 1), 0, fn i, acc ->
+        nodo_vecinos = Enum.at(vecinos, i)
+        conexiones =
+          for v1 <- nodo_vecinos, v2 <- nodo_vecinos, v1 != v2, do: {v1, v2}
 
-  #   # Simulación de una blockchain
-  #   [
-  #     %{id: 1, data: "Bloque inicial", hash: "0000", prev_hash: "0000"},
-  #     %{id: 2, data: "Transacción 1", hash: "abcd", prev_hash: "0000"}
-  #   ]
-  # end
+        conexiones_validas =
+          Enum.count(conexiones, fn {v1, v2} ->
+            v2 in Enum.at(vecinos, Enum.find_index(procesos, fn p -> p == v1 end))
+          end)
+
+        acc + conexiones_validas / max(1, (length(nodo_vecinos) * (length(nodo_vecinos) - 1)))
+      end)
+
+    clustering_sum / n
+  end
 end
 
 # --------end--------
 
 # -------- Módulo NodoHonesto --------
 defmodule NodoHonesto do
+  @moduledoc """
+  Módulo de nodo honesto que simula un proceso no malicioso en la red.
+  """
+
+  @doc """
+  Inicia un nodo honesto con el estado inicial especificado.
+  """
   def inicia() do
-    Grafica.inicia()
+    estado_inicial = %{
+      :lider => nil,
+      :vecinos => [],
+      :blockchain => Blockchain.new(),  # Crear una nueva blockchain
+      :bizantino => false
+    }
+    Grafica.inicia(estado_inicial)
   end
 end
+# --------end--------
 
 # -------- Módulo NodoBizantino --------
 defmodule NodoBizantino do
-  def inicia() do
-    recibe_mensaje()
-  end
+  @moduledoc """
+  Módulo de nodo bizantino que simula un proceso malicioso en la red.
+  """
 
-  defp recibe_mensaje() do
-    receive do
-      {:proponer, _valor} ->
-        # Generar bloque basura y enviarlo a los vecinos
-        IO.puts("Nodo bizantino generando bloque malicioso")
-        # Lógica para propagar bloque malicioso
-    end
+  @doc """
+  Inicia un nodo bizantino con el estado inicial especificado.
+  """
+  def inicia() do
+    estado_inicial = %{
+      :lider => nil,
+      :vecinos => [],
+      :blockchain => Blockchain.new(),  # Crear blockchain, pero con posibilidad de modificarla
+      :bizantino => true
+    }
+    Grafica.inicia(estado_inicial)
   end
 end
-
 # --------end--------
