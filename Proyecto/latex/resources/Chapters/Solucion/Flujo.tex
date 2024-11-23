@@ -1,56 +1,4 @@
-
-\vspace{1cm}
-{\Huge{\textbf{Primer Idea}}} 
-\vspace{1cm}
-
 {\large{
-
-    Proceso de Inserción de un Bloque en la Blockchain  \vspace{.3cm}
-
-    Supongamos que inicialmente la Blockchain solo está compuesta por al menos el bloque *“Genesis Block”* y que existe un nodo A que desea insertar un bloque a la Blockchain.  \vspace{.3cm}
-
-    Si el nodo A crea un bloque, este debe ser válido por sí solo, es decir, al menos debe contar con la siguiente información:
-
-    \begin{itemize}
-        \item \texttt{data}: La información de transacción.
-        \item \texttt{timestamp}: Fecha y hora de la creación del bloque.
-        \item \texttt{prev\_hash}: Último hash de la Blockchain.
-        \item \texttt{hash}: Hash del bloque actual.  \vspace{.3cm}
-    \end{itemize}
-
-    \textbf{Nota}: La creación de este bloque implica el uso del módulo \texttt{Crypto}.  \vspace{.3cm}
-
-    Si el bloque no cumple con los requisitos mínimos, este es desechado automáticamente.  \vspace{.3cm}
-
-    Si el bloque es válido, este se difunde al resto de nodos en la red.  \vspace{.3cm}
-
-    Para cada nodo que ha recibido el bloque nuevo, se debe validar que este tiene el hash correcto del bloque anterior con respecto a la versión de la Blockchain que dispone cada uno. Además, se debe verificar que la fecha del nuevo bloque sea mayor que la del bloque previo a este.  \vspace{.3cm}
-
-    Si el bloque es válido, este se añade a la Blockchain. En otro caso, se desecha.  \vspace{.3cm}
-
-    Después de la inserción, se verifica cuál es la Blockchain correcta (la más larga) para compartir esta versión a los nodos que se quieran unir a la red.  \vspace{.3cm}
-
-    Para ello, sea \textit{bc} una estructura auxiliar que guardará la Blockchain que, por el momento, tiene la mayoría y sea \textit{mayoría} una variable auxiliar que cuenta cuántos nodos tienen la misma Blockchain que \textit{bc}.  \vspace{.3cm}
-
-    Inicialmente, se toma un nodo de la red y se supone que su Blockchain es la correcta; se copia su información a \textit{bc} y se establece \textit{mayoría = 0}. Tomamos el siguiente nodo para revisar su versión de la Blockchain comparándolo con \textit{bc}.  \vspace{.3cm}
-
-    \begin{itemize}
-        \item Si las dos Blockchains son iguales, se incrementa en uno \textit{mayoría}.
-        \item Si son diferentes, se toma como la verdadera Blockchain la que se está revisando y se actualiza \textit{bc}.  \vspace{.3cm}
-    \end{itemize}
-
-    Para las siguientes rondas, si \textit{mayoría} > 0 y la Blockchain que se está revisando es distinta a \textit{bc}, disminuimos en uno \textit{mayoría}. Cuando \textit{mayoría} sea igual a cero, actualizamos \textit{bc}.  \vspace{.3cm}
-
-    El algoritmo termina cuando se hayan revisado todas las Blockchains.
-}}
-
-\vspace{1cm}
-{\Huge{\textbf{Segunda Idea}}} 
-\vspace{1cm}
-
-{\large{
-    \section*{Flujo de Alto Nivel del Programa}
-
     \textbf{1. Inicialización del Sistema:}
     \begin{itemize}
         \item \textbf{Entrada:} El programa recibe dos parámetros principales:
@@ -69,97 +17,44 @@
 
     \textbf{2. Creación de Procesos y Asignación de Roles:}
     \begin{itemize}
-        \item \textbf{Spawning de Procesos:} Los nodos se representan como procesos concurrentes en Elixir, cada uno responsable de gestionar la lógica de su respectivo nodo en la blockchain.
+        \item \textbf{Spawning de Procesos:} Los nodos se representan como procesos concurrentes en Elixir, cada uno responsable de gestionar la lógica de su respectivo nodo en la blockchain. 
+        
+        Vamos a crear nodos con diferentes roles, como se muestra a continuación:
         \item \textbf{Asignación de Roles:}
         \begin{itemize}
-            \item \textbf{Nodos honestos:} Serán responsables de validar y propagar transacciones y bloques correctos.
-            \item \textbf{Nodos bizantinos:} Estos nodos generarán bloques maliciosos o basura, intentado alterar la blockchain y perturbar el consenso.
+            \item \textbf{Réplica:} Nodo que participa en el consenso de la red. Son todos los nodos excepto el líder; si quiere proponer un nodo lo manda al lider para que lo gestione.
+            \item \textbf{Líder (o primary):} Nodo que coordina el consenso de la red. Este rol se deberia asignar dinámicamente en cada ronda usando un criterio determinista. Pero para simplificar, inicialmente se elige un nodo honesto arbitrariamente.
+            \item \textbf{Bizantino:} Nodo que puede enviar mensajes maliciosos a la red. Este nodo también actúa como réplica, pero su comportamiento es defectuoso por diseño.
+        \end{itemize}
+
+        Los estados de los nodos se gestionan de manera local en cada proceso. Cada nodo tendrá un estado inicial que incluye:
+        \begin{itemize}
+            \item \textbf{ID único:} Identificador del nodo el que le da elixir vamos a usar para no confundirmelo con el PID.
+            \item \textbf{Rol:} Líder, réplica o bizantino.
+            \item \textbf{Blockchain local:} Registro de bloques confirmados.
+            \item \textbf{Mensajes recibidos:} Historial temporal de mensajes relacionados con la ronda actual.
+            \item \textbf{Lider: } El ID del lider actual.
         \end{itemize}
     \end{itemize}
 
     \vspace{0.5cm}
 
-    \textbf{3. Generación de Bloques:}
+    \textbf{3. Ejecución del Consenso:}
     \begin{itemize}
-        \item \textbf{Proceso de Bloques:}
-        \begin{itemize}
-            \item Cada nodo (honesto o bizantino) genera bloques de acuerdo con los datos que quiere insertar en la blockchain.
-            \item Un bloque incluye:
-            \begin{itemize}
-                \item \texttt{data}: El contenido de la transacción o mensaje.
-                \item \texttt{timestamp}: La hora en la que se generó el bloque.
-                \item \texttt{prev\_hash}: El hash del bloque anterior.
-                \item \texttt{hash}: El hash del bloque actual generado a partir de los datos.
-            \end{itemize}
-        \end{itemize}
-        \item \textbf{Validación de Bloques:}
-        \begin{itemize}
-            \item Los nodos validan los bloques según la regla de que cada bloque debe contener un hash válido del bloque anterior.
-            \item Los bloques generados por los nodos bizantinos se detectan como inválidos y no se insertan en la blockchain.
-        \end{itemize}
-    \end{itemize}
-
-    \vspace{0.5cm}
-
-    \textbf{4. Proceso de Consenso:}
-    \begin{itemize}
-        \item \textbf{Comunicación entre Nodos:}
-        \begin{itemize}
-            \item Los nodos honestos intercambian información entre sí para llegar a un consenso sobre la validez de los bloques.
-            \item Se utiliza un protocolo de consenso \textbf{CAMBIAR ESTO} donde los nodos honestos verifican si los bloques propuestos cumplen con las reglas del sistema.
-        \end{itemize}
-        \item \textbf{Bloques Maliciosos:}
-        \begin{itemize}
-            \item Los nodos bizantinos intentan insertar bloques maliciosos en la blockchain. Sin embargo, debido a la validación y el consenso de la red, estos bloques no se aceptan, y se descartan.
-        \end{itemize}
-    \end{itemize}
-
-    \vspace{0.5cm}
-
-    \textbf{5. Validación de la Blockchain:}
-    \begin{itemize}
-        \item \textbf{Validación Continua:}
-        \begin{itemize}
-            \item En todo momento, la blockchain debe validarse para asegurarse de que no haya bloques comprometidos. Esta validación se realiza mediante la comparación de los bloques, verificando que el hash de un bloque coincida con el \texttt{prev\_hash} del siguiente bloque.
-        \end{itemize}
-        \item \textbf{Redefinición de la Blockchain:}
-        \begin{itemize}
-            \item Si se detecta una alteración significativa o corrupción en la blockchain (debido a bloques maliciosos de nodos bizantinos), la blockchain puede ser descartada y se puede iniciar una nueva cadena.
-        \end{itemize}
-    \end{itemize}
-
-    \vspace{0.5cm}
-
-    \textbf{6. Inserción de Nuevos Bloques:}
-    \begin{itemize}
-        \item \textbf{Proceso de Inserción:}
-        \begin{itemize}
-            \item Cuando un bloque es validado correctamente, se inserta en la blockchain.
-            \item La cadena se mantiene actualizada y es replicada en los nodos honestos.
-        \end{itemize}
-    \end{itemize}
-
-    \vspace{0.5cm}
-
-    \textbf{7. Finalización:}
-    \begin{itemize}
-        \item \textbf{Detención del Programa:}
-        \begin{itemize}
-            \item Una vez que el proceso de simulación ha terminado, el programa termina, y la blockchain se elimina de la memoria. No se realiza persistencia de datos.
-            \item Se puede consultar el estado final de la blockchain en la terminal para verificar que las transacciones se han propagado correctamente y que los bloques maliciosos fueron descartados.
-        \end{itemize}
+        \item Los nodos y el líder colaboran para ejecutar el consenso pBFT según lo descrito en la \textbf{Sección 2.2: Consenso}.
+        \item El proceso incluye las fases de \textit{pre-prepare}, \textit{prepare} y \textit{commit}, asegurando que todos los nodos honestos lleguen a un acuerdo sobre los bloques.
+        \item Los nodos bizantinos intentarán interrumpir el consenso, enviando mensajes inconsistentes o maliciosos.
     \end{itemize}
 
     \vspace{0.5cm}
 
     \textbf{Resumen Visual del Flujo:}
     \begin{enumerate}
-        \item \textbf{Inicialización:} Parámetros ($n$, $f$) → Topología de Red (Modelo Watts y Strogatz) → Creación de Nodos (honestos y bizantinos)
-        \item \textbf{Generación de Bloques:} Nodos crean bloques (datos, timestamp, prev\_hash, hash)
-        \item \textbf{Validación de Bloques:} Nodos validan bloques, descartan bloques maliciosos de nodos bizantinos.
-        \item \textbf{Proceso de Consenso:} Nodos honestos alcanzan consenso, bloques correctos son insertados.
-        \item \textbf{Validación Continua de la Blockchain:} Se valida la cadena para asegurar que no haya corrupción de datos.
-        \item \textbf{Inserción de Nuevos Bloques:} Bloques válidos son insertados y replicados entre nodos honestos.
-        \item \textbf{Finalización:} Programa termina, blockchain se elimina (sin persistencia).
+        \item \textbf{Inicialización:} Parámetros ($n$, $f$) → Topología de Red (Modelo Watts y Strogatz) → Creación de Nodos (honestos y bizantinos).
+        \item \textbf{Asignación de Roles:} Líder creado, resto de nodos como réplicas (incluyendo bizantinos).
+        \item \textbf{Consenso:} Se ejecuta pBFT (\textbf{ver Sección 2.2}) para alcanzar consenso sobre nuevos bloques.
+        \item \textbf{Validación:} Cada nodo confirma el bloque acordado y lo agrega a su blockchain local.
     \end{enumerate}
 }}
+
+\vspace{0.5cm}
