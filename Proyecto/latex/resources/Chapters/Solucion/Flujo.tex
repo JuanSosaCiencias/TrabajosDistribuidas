@@ -22,7 +22,7 @@
         Vamos a crear nodos con diferentes roles, como se muestra a continuación:
         \item \textbf{Asignación de Roles:}
         \begin{itemize}
-            \item \textbf{Réplica:} Nodo que participa en el consenso de la red. Son todos los nodos excepto el líder.
+            \item \textbf{Réplica:} Nodo que participa en el consenso de la red. Son todos los nodos excepto el líder; si quiere proponer un nodo lo manda al lider para que lo gestione.
             \item \textbf{Líder (o primary):} Nodo que coordina el consenso de la red. Este rol se deberia asignar dinámicamente en cada ronda usando un criterio determinista. Pero para simplificar, inicialmente se elige un nodo honesto arbitrariamente.
             \item \textbf{Bizantino:} Nodo que puede enviar mensajes maliciosos a la red. Este nodo también actúa como réplica, pero su comportamiento es defectuoso por diseño.
         \end{itemize}
