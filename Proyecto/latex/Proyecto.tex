@@ -39,6 +39,9 @@
 \addbibresource{resources/referencias/referencias.bib}
 \usepackage{csquotes}
 
+% ----- Configuración del idioma (Español) ------%
+\usepackage[spanish]{babel}
+
 
 \begin{document}
     \input{portada.tex} % Portada del documento
@@ -57,7 +60,7 @@
     \section{\Large{Flujo general de la solución}}
     \input{resources/Chapters/Solucion/Flujo.tex}
 
-    \section{\Large{Consenso}}
+    \section{\Large{Consenso : pBFT}}
     \input{resources/Chapters/Solucion/Consenso.tex}
 
     \section{\Large{Módulos y sus funciones}}
@@ -80,8 +83,6 @@
     \input{resources/Chapters/Conclusiones/conclusiones.tex}
 
     % Bibliografía
-    \newpage  
-    \chapter*{Referencias}
     \addcontentsline{toc}{chapter}{Referencias}
     \printbibliography
 \end{document}
