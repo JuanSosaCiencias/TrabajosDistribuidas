@@ -34,6 +34,7 @@ end
   #  Al darle este mensaje al nodo nos imprime su estado actual.
   def procesa_mensaje({:estado, _}, estado) do
     IO.puts("Proceso con PID #{inspect(self())}: Estado actual: #{inspect(estado[:blockchain])}")
+    estado = reiniciar_mensajes_y_vistos(estado)
     {:ok, estado}
   end
 
@@ -55,15 +56,11 @@ end
 
 
   def procesa_mensaje({:bloque, bloque}, estado) do
-    if estado[:lider] == inspect(self()) do
       # Fase Pre-Prepare: el líder envía el bloque a los vecinos
       IO.puts("Proceso #{inspect(self())}: Soy el líder, iniciando Pre-Prepare con bloque #{inspect(bloque)}")
       Enum.each(estado[:vecinos], fn vecino ->
         send(vecino, {:preprepare, bloque, inspect(self())})
       end)
-    else
-      IO.puts("Proceso #{inspect(self())}: No soy el líder, ignorando mensaje de bloque.")
-    end
     {:ok, estado}
   end
 
@@ -127,6 +124,14 @@ end
       {:ok, estado}
     end
   end
+
+  defp reiniciar_mensajes_y_vistos(estado) do
+    IO.puts("Proceso #{inspect(self())}: Reiniciando mensajes y mensajes vistos para un nuevo consenso.")
+    estado
+    |> Map.put(:mensajes, %{:prepare => [], :commit => []})
+    |> Map.put(:mensajes_vistos, MapSet.new())
+  end
+
 
   defp actualizar_mensajes(estado, tipo, mensaje) do
     mensajes_actualizados = Map.update(estado[:mensajes], tipo, [mensaje], &[mensaje | &1])
