@@ -13,7 +13,24 @@ defmodule Block do
     # Insertamos el hash en el bloque
     Crypto.put_hash(block)
   end
+
+  @doc """
+  Valida un bloque individual.
+  """
+  def valid?(%Block{} = block) do
+    block.hash == Crypto.hash(block)
+  end
+
+  @doc """
+  Valida si dos bloques secuenciales son válidos.
+  Incluye la validación de `prev_hash` y del orden temporal.
+  """
+  def valid?(%Block{} = block1, %Block{} = block2) do
+    block2.prev_hash == block1.hash and block1.timestamp <= block2.timestamp and Block.valid?(block1) and Block.valid?(block2)
+  end
+
 end
+
 
 defmodule Blockchain do
   defstruct chain: []
@@ -37,18 +54,34 @@ defmodule Blockchain do
   end
 
   @doc """
-  Inserta un nuevo bloque en la blockchain.
-  Verifica que el hash del último bloque coincida con el prev_hash del nuevo bloque.
+  Valida la blockchain completa.
+  Incluye validaciones de hashes, `prev_hash` y orden temporal.
   """
-  def insert(data, %Blockchain{chain: chain} = blockchain) do
+  def valid?(%Blockchain{chain: chain}) do
+    chain
+    |> Enum.chunk_every(2, 1, :discard) # Obtiene pares consecutivos
+    |> Enum.all?(fn
+      [block1, block2] -> Block.valid?(block1, block2)
+      [block] -> Block.valid?(block)
+    end)
+  end
+
+  @doc """
+  Inserta un nuevo bloque en la blockchain.
+  Valida que el bloque sea consistente antes de insertarlo.
+  """
+  def insert(%Block{} = new_block, %Blockchain{chain: chain} = blockchain) do
     case List.last(chain) do
       nil ->
         {:error, "La blockchain no tiene un bloque génesis. Usa `Blockchain.new()` para inicializarla."}
 
       last_block ->
-        new_block = Block.new(data, last_block.hash)
-        updated_chain = chain ++ [new_block]
-        {:ok, %Blockchain{blockchain | chain: updated_chain}}
+        if Block.valid?(last_block, new_block) do
+          updated_chain = chain ++ [new_block]
+          {:ok, %Blockchain{blockchain | chain: updated_chain}}
+        else
+          {:error, "El nuevo bloque no es válido"}
+        end
     end
   end
 end
