@@ -11,7 +11,7 @@ defmodule Main do
   NOTA: Aun no se ha implementado la lógica de consenso, ni validación de bloques, ni propagación de mensajes, ni blockchain real, solo crea los nodos y crea la grafica
   """
   def run(n, f) do
-    IO.puts("Iniciando la red con #{n} nodos, incluyendo #{f} procesos bizantinos...")
+    IO.puts("\n\n Iniciando la red con #{n} nodos, incluyendo #{f} procesos bizantinos...\n ")
 
     procesos = crea_nodos(n, f)
 
@@ -23,32 +23,45 @@ defmodule Main do
     Process.sleep(1000)
     IO.puts("\n Vecinos asignados ... \n")
 
-
-    #se elige un lider no bizantino
+    # se toma un proceso cualquiera para mandar el primer bloque
     ([h | _]) = procesos
-    lider_id = inspect(h)
-    Enum.each(procesos, fn pid -> send(pid, {:lider, lider_id }) end)
 
-
-    # Crear un nuevo bloque para enviar al líder (válido)
+    # Crear un nuevo bloque para enviar al proceso (válido)
     bloque = Block.new("Bloque valido", "2AF1E39")
     IO.puts("\n Creando un nuevo bloque: #{inspect(bloque)}\n")
 
-    # Enviar el bloque al líder
-    IO.puts("\n Enviando bloque al líder...\n")
+    # Enviar el bloque al proceso
+    Process.sleep(3000)
+    IO.puts("\n Enviando bloque a un proceso...\n")
     send(h, {:bloque, bloque})
 
-
     # Esperar propagación
-    Process.sleep(10000)
+    Process.sleep(3000)
     IO.puts("\n Consenso según confirmado ... \n")
 
      # Verificar el estado de cada nodo
     IO.puts("\n Verificando estado final de los nodos...\n")
     Enum.each(procesos, fn pid -> send(pid, {:estado, nil}) end)
 
+    Process.sleep(5000)
+    # Crear un nuevo bloque para enviar al proceso (Invalido)
+    bloque = Block.new("Bloque invalido", "6969696")
+    IO.puts("\n Creando un nuevo bloque invalido: #{inspect(bloque)}\n")
 
-    procesos
+    # Enviar el bloque al proceso
+    Process.sleep(3000)
+    IO.puts("\n Enviando bloque a un proceso...\n")
+    send(h, {:bloque, bloque})
+
+    # Esperar propagación
+    Process.sleep(3000)
+    IO.puts("\n Consenso según confirmado ... \n")
+
+     # Verificar el estado de cada nodo
+    IO.puts("\n Verificando estado final de los nodos...\n")
+    Enum.each(procesos, fn pid -> send(pid, {:estado, nil}) end)
+
+    procesos # Devolver los procesos para interaccion manual
   end
 
 
@@ -143,43 +156,6 @@ defmodule Main do
 
     clustering_sum / n
   end
-
-  def verifica_consenso(procesos, bloque) do
-    # Enviar mensaje de consulta a todos los procesos
-    Enum.each(procesos, fn pid ->
-      send(pid, {:consulta_estado, self()})
-    end)
-
-    # Recibir respuestas
-    respuestas = Enum.map(procesos, fn _ ->
-      receive do
-        {:estado, pid, blockchain} ->
-          IO.puts("Nodo #{inspect(pid)} reporta blockchain: #{inspect(blockchain)}")
-          blockchain
-      after
-        5000 ->
-          IO.puts("Nodo no respondió a tiempo.")
-          nil
-      end
-    end)
-
-    # Validar que todos los procesos tienen el bloque en su blockchain
-    consenso = Enum.all?(respuestas, fn blockchain ->
-      case blockchain do
-        %Blockchain{chain: chain} -> Enum.any?(chain, fn b -> b.hash == bloque.hash end)
-        _ -> false
-      end
-    end)
-
-    if consenso do
-      IO.puts("¡Todos los nodos han alcanzado el consenso! Bloque presente en todas las blockchains.")
-      true
-    else
-      IO.puts("Fallo en el consenso. No todos los nodos tienen el bloque.")
-      false
-    end
-  end
-
 end
 
 # --------end--------
@@ -195,7 +171,6 @@ defmodule NodoHonesto do
   """
   def inicia() do
     estado_inicial = %{
-      :lider => nil,
       :vecinos => [],
       :blockchain => Blockchain.new(),  # Crear una nueva blockchain
       :bizantino => false,
@@ -217,7 +192,6 @@ defmodule NodoBizantino do
   """
   def inicia() do
     estado_inicial = %{
-      :lider => nil,
       :vecinos => [],
       :blockchain => Blockchain.new(),  # Crear blockchain, pero con posibilidad de modificarla
       :bizantino => true,
@@ -226,10 +200,4 @@ defmodule NodoBizantino do
     Grafica.inicia(estado_inicial)
   end
 end
-
-
-
-
-
-
 # --------end--------
