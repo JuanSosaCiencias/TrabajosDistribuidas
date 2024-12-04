@@ -11,35 +11,69 @@ defmodule Main do
   NOTA: Aun no se ha implementado la lógica de consenso, ni validación de bloques, ni propagación de mensajes, ni blockchain real, solo crea los nodos y crea la grafica
   """
   def run(n, f) do
-    IO.puts("Iniciando la red con #{n} nodos, incluyendo #{f} procesos bizantinos...")
+    IO.puts("\n\n Iniciando la red con #{n} nodos, incluyendo #{f} procesos bizantinos...\n ")
 
     procesos = crea_nodos(n, f)
 
     Process.sleep(1000)  # Esperar a que los nodos se inicialicen
     IO.puts("\n Nodos inicializados. Asignando vecinos... \n")
 
-    vecinos = asigna_vecinos(procesos)
+    asigna_vecinos(procesos)
 
-    Process.sleep(1000)  # Esperar a que los nodos se inicialicen
+    Process.sleep(1000)
     IO.puts("\n Vecinos asignados ... \n")
 
-    vecinos
+    # se toma un proceso cualquiera para mandar el primer bloque
+    ([h | _]) = procesos
+
+    # Crear un nuevo bloque para enviar al proceso (válido)
+    bloque = Block.new("Bloque valido", "2AF1E39")
+    IO.puts("\n Creando un nuevo bloque: #{inspect(bloque)}\n")
+
+    # Enviar el bloque al proceso
+    Process.sleep(3000)
+    IO.puts("\n Enviando bloque a un proceso...\n")
+    send(h, {:bloque, bloque})
+
+    # Esperar propagación
+    Process.sleep(3000)
+    IO.puts("\n Consenso según confirmado ... \n")
+
+     # Verificar el estado de cada nodo
+    IO.puts("\n Verificando estado final de los nodos...\n")
+    Enum.each(procesos, fn pid -> send(pid, {:estado, nil}) end)
+
+    Process.sleep(5000)
+    # Crear un nuevo bloque para enviar al proceso (Invalido)
+    bloque = Block.new("Bloque invalido", "6969696")
+    IO.puts("\n Creando un nuevo bloque invalido: #{inspect(bloque)}\n")
+
+    # Enviar el bloque al proceso
+    Process.sleep(3000)
+    IO.puts("\n Enviando bloque a un proceso...\n")
+    send(h, {:bloque, bloque})
+
+    # Esperar propagación
+    Process.sleep(3000)
+    IO.puts("\n Consenso según confirmado ... \n")
+
+     # Verificar el estado de cada nodo
+    IO.puts("\n Verificando estado final de los nodos...\n")
+    Enum.each(procesos, fn pid -> send(pid, {:estado, nil}) end)
+
+    procesos # Devolver los procesos para interaccion manual
   end
 
 
-  @doc """
-  Crea `n` nodos, incluyendo `f` procesos bizantinos.
-  """
+  # Crea `n` nodos, incluyendo `f` procesos bizantinos.
   defp crea_nodos(n, f) do
     # Crear `f` procesos bizantinos y `n - f` procesos honestos
     bizantinos = for _ <- 1..f, do: spawn(NodoBizantino, :inicia, [])
     honestos = for _ <- 1..(n - f), do: spawn(NodoHonesto, :inicia, [])
-    bizantinos ++ honestos
+    honestos ++ bizantinos
   end
 
-  @doc """
-  Asigna vecinos a los nodos de la red. Se asegura de que el coeficiente de agrupamiento sea mayor a 0.4.
-  """
+  # Asigna vecinos a los nodos de la red. Se asegura de que el coeficiente de agrupamiento sea mayor a 0.4.
   defp asigna_vecinos(procesos) do
     n = length(procesos)
     k = max(2, div(n, 4))  # Ajuste para definir la cantidad de vecinos
@@ -137,10 +171,10 @@ defmodule NodoHonesto do
   """
   def inicia() do
     estado_inicial = %{
-      :lider => nil,
       :vecinos => [],
       :blockchain => Blockchain.new(),  # Crear una nueva blockchain
-      :bizantino => false
+      :bizantino => false,
+      :mensajes => %{:prepare => [], :commit => []}
     }
     Grafica.inicia(estado_inicial)
   end
@@ -158,10 +192,10 @@ defmodule NodoBizantino do
   """
   def inicia() do
     estado_inicial = %{
-      :lider => nil,
       :vecinos => [],
       :blockchain => Blockchain.new(),  # Crear blockchain, pero con posibilidad de modificarla
-      :bizantino => true
+      :bizantino => true,
+      :mensajes => %{:prepare => [], :commit => []}
     }
     Grafica.inicia(estado_inicial)
   end

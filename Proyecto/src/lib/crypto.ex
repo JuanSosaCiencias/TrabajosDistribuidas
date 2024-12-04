@@ -18,10 +18,14 @@ defmodule Crypto do
   # ChatGPT me ayudó porque encode no acepta no binarios
   defp encode_to_binary(map) do
     map
-    |> Enum.map(fn {_, value} -> "#{value}" end) # Convierte cada valor en string
-    |> Enum.join()                               # Concatena todos los valores en un solo string
-    |> :erlang.binary_to_list()                  # Convierte el string a binario
+    |> Enum.map(fn {_, value} -> to_binary(value) end)
+    |> Enum.join()
+    |> :erlang.binary_to_list()
   end
+
+  defp to_binary(value) when is_binary(value), do: value
+  defp to_binary(value), do: inspect(value)
+
 
   defp simple_hash(binary) do
     :erlang.phash2(binary) |> Integer.to_string(16)
