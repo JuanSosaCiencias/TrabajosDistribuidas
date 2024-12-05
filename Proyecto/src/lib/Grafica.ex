@@ -1,12 +1,17 @@
-# -------- Módulo Grafica --------
-
 defmodule Grafica do
   @moduledoc """
-  Módulo de red distribuida para implementar consenso y elección de líder.
+  Módulo de una red distribuida que implementa el consenso para insertar un nuevo bloque a la blockchain.
   """
 
   @doc """
-  Inicia un nodo con el estado inicial especificado.
+  Inicializa un nodo con el estado inicial especificado.
+
+   El estado inicial incluye:
+  - `:vecinos`: lista de otros nodos con los que se comunica.
+  - `:blockchain`: blockchain actual del nodo.
+  - `:bizantino`: indica si en un nodo malicioso o no.
+  - `:mensajes`: mensajes recibidos por el nodo.
+
   """
   def inicia(estado_inicial \\ %{
       :vecinos => [],
@@ -45,8 +50,7 @@ end
     {:ok, estado}
   end
 
-  #### Codigo para el pBFT
-
+  #### Codigo para pBFT
 
   def procesa_mensaje({:bloque, bloque}, estado) do
     if estado[:bizantino] do
@@ -113,7 +117,12 @@ end
     end
   end
 
+   @doc """
+  El nodo verifica si el mensaje ya ha sido visto. 
 
+  Si no ha sido visto se agrega a los mensajes y se retransmite. 
+  Si se alcanza un cuórum de mensajes `:commit` el bloque se agrega a la blockchain.
+  """
   def procesa_mensaje({:commit, bloque, nodo_id} = mensaje, estado) do
     if not mensaje_visto?(estado, mensaje) do
       # IO.puts("Proceso #{inspect(self())}: Recibí Commit de #{nodo_id}")
@@ -124,7 +133,6 @@ end
       Enum.each(estado[:vecinos], fn vecino ->
       send(vecino, mensaje)
       end)
-
 
       # IO.puts("Proceso #{inspect(self())}: Cuórum de Commit alcanzado, agregando bloque a la blockchain")
       estado = agregar_bloque(bloque, estado)
@@ -142,7 +150,6 @@ end
     |> Map.put(:mensajes, %{:prepare => [], :commit => []})
     |> Map.put(:mensajes_vistos, MapSet.new())
   end
-
 
   defp actualizar_mensajes(estado, tipo, mensaje) do
     mensajes_actualizados = Map.update(estado[:mensajes], tipo, [mensaje], &[mensaje | &1])
@@ -171,7 +178,6 @@ end
     end
   end
 
-
   # Helper functions for message deduplication
   defp mensaje_visto?(estado, mensaje) do
     vistos = Map.get(estado, :mensajes_vistos, MapSet.new())
@@ -184,5 +190,3 @@ end
   end
 
 end
-
-# --------end --------
