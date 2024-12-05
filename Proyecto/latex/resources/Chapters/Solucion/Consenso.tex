@@ -1,24 +1,31 @@
-{\large{
-    Para el consenso, el equipo decidio utilizar el algoritmo ya creado, \textbf{pBFT}; para la información de esta seccion se utilizaron las referencias: \cite{geeksforgeeks_pbft} \cite{castro_liskov_1999}. \vspace{0.3cm}
+\large{
+Para el consenso, el equipo decidió utilizar el algoritmo ya creado, \textbf{pBFT}; para la información de esta sección se utilizaron las referencias: \cite{geeksforgeeks_pbft} \cite{castro_liskov_1999}. 
 
-    La primera es mas facil de digerir y tiene las bases del algoritmo, mientras que la segunda es mas fuerte, siendo el paper original del algoritmo, igualmente este segundo es mas por si se quiere profundizar en el tema. \vspace{0.3cm}
+La primera es más accesible y proporciona las bases del algoritmo, mientras que la segunda es más técnica, siendo el paper original. Este segundo recurso es útil para profundizar en el tema. 
 
-    Ahora si empecemos, vamos a caracterizar el problema primero para ver que es lo que se quiere resolver. \vspace{0.3cm}
-    \begin{itemize}
-        \item \textbf{Nodos Bizantinos:} En nuestro sistema, como ya dijimos habra nodos que se comporten de manera maliciosa, enviando mensajes incorrectos a la red. Nuestro sistema debe ser capaz de tolerar estos nodos y llegar a un consenso a pesar de. 
-        \item \textbf{Errores en los mensajes:} Como es una red real, los mensajes pueden perderse, retrasarse o llegar en un orden incorrecto; se asume que siempre van a llegar en este modelo. Nuestro sistema debe ser capaz de tolerar estos errores y llegar a un consenso a pesar de.
-        \item \textbf{Consistencia:} Todos los nodos que sean honestos deben llegar a un consenso sobre el orden de los bloques, y si un bloque es valido o no.
-        \item \textbf{Validez:} El resultado consensuado no puede ser un bloque basura generado por un nodo malicioso.
-    \end{itemize}
+Antes de explicar el consenso, los problemas que el algoritmo busca resolver son:
+\begin{itemize}
+    \item \textbf{Nodos Bizantinos:} Habrá nodos maliciosos que envíen mensajes incorrectos a la red. Nuestro sistema debe tolerarlos y alcanzar un consenso a pesar de su presencia.
+    \item \textbf{Errores en los mensajes:} En una red real, los mensajes pueden perderse, retrasarse o llegar desordenados; asumimos que siempre llegan eventualmente. El sistema debe tolerar estos problemas y alcanzar el consenso.
+    \item \textbf{Consistencia:} Todos los nodos honestos deben consensuar el orden de los bloques y validar su legitimidad.
+    \item \textbf{Validez:} El consenso alcanzado no debe incluir bloques corruptos generados por nodos maliciosos.
+\end{itemize}
 
-    Ahora, el algirtmo pBFT sigue una serie de 3 etapas para llegar a un consenso, estas son:
-    \begin{enumerate}
-        \item \textbf{Preparacion Inicial (Pre-Prepare):} El nodo que elegimos como lider, propone un mensaje para ser aceptado por la red, le llaman \textit{request}. En esta etapa el lider envia el mensaje \textit{pre-prepare} a todos los nodos, este mensaje contiene el numero de vista actual y el mensaje en si. Se utiliza generalmente un numero secuencial pero nosotros podemos usar el timestamp que llevan los bloques para esto. Junto con el hash son ID del mensaje que se envia.
-        
-        \item \textbf{Preparacion (Prepare):} Una vez que un nodo recibe el mensaje \textit{pre-prepare}, este nodo lo valida checando con la funcion del bloque, si es valido, con su ultimo bloque y el bloque si es valido también y checa tambien que sea del lider actual. Si todo esto es correcto, el nodo envia un mensaje \textit{prepare} a todos los nodos, este mensaje contiene el hash del mensaje que se esta aceptando y el ID del nodo que lo envia. Los nodos van acumulando estos mensajes \textit{prepare} de otros. Si un nodo recibe $2f+1$ mensajes \textit{prepare} validos (incluyendo el suyo), entonces este nodo puede pasar a la siguiente etapa. (f es la cantidad de nodos bizantinos, podemos ponerle que asuma el peor caso y que sea $n/3$).
-        
-        \item \textbf{Compromiso (Commit):} Cuando llega a esta etapa el nodo envia un mensaje \textit{commit} a todos los nodos, este mensaje contiene el hash del mensaje que se esta aceptando y el ID del nodo que lo envia. Los nodos van acumulando estos mensajes \textit{commit} de otros. Si un nodo recibe $2f+1$ mensajes \textit{commit} validos (incluyendo el suyo), entonces este nodo puede aceptar el mensaje y agregarlo a su blockchain local. Ademas, el nodo envia un mensaje \textit{reply} al nodo lider para que este sepa que el mensaje fue aceptado por la red.
-    \end{enumerate}
+}
 
-    Consideramos que este algoritmo es bueno a pesar de su complejidad en comunicacion $O(n^2)$ porque no vamos a crecer tanto la red, y ademas, es un algoritmo que es muy seguro y tolerante a fallos que no suena tan dificil de implementar pero si es posible que tengamos que hacer algunos ajustes para implementar el algoritmo en Elixir. \textit{(Skill issue)} \vspace{0.3cm}
-}}
+\section*{El Algoritmo pBFT}
+
+El algoritmo \textbf{pBFT} sigue tres etapas principales para llegar al consenso:
+
+\begin{enumerate}
+    \item \textbf{Preparación Inicial (Pre-Prepare):} 
+    Un nodo propone un mensaje para ser aceptado por la red. Este mensaje, llamado \textit{preprepare}, contiene un identificador único (hash o timestamp) y el bloque propuesto.
+
+    \item \textbf{Preparación (Prepare):} 
+    Los nodos que reciben un mensaje \textit{preprepare} validan el bloque. Si es válido, envían un mensaje \textit{prepare} a sus vecinos. Cada nodo acumula mensajes \textit{prepare}. Si recibe al menos \(2f + 1\) mensajes válidos (incluido el suyo), pasa a la siguiente etapa.
+
+    \item \textbf{Compromiso (Commit):} 
+    En esta fase, el nodo envía un mensaje \textit{commit} a todos sus vecinos. Si un nodo acumula \(2f + 1\) mensajes \textit{commit} válidos, acepta el bloque y lo agrega a su \texttt{blockchain} local.
+\end{enumerate}
+
+Aunque el algoritmo tiene una complejidad de comunicación \(O(n^2)\), consideramos que esto es manejable para redes pequeñas o medianas.
