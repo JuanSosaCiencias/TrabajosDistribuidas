@@ -1,0 +1,473 @@
+\large{
+\section*{Archivo \textbf{Blockchain.ex}:}
+\section*{Módulo \texttt{Block}}
+
+\subsection*{\texttt{new/2}}
+\begin{verbatim}
+new(data, prev_hash)
+\end{verbatim}
+
+Crea un nuevo bloque con los datos proporcionados (\texttt{data}) y el hash del bloque previo (\texttt{prev\_hash}).
+
+\[
+\text{timestamp} = \text{DateTime.utc\_now()} \rightarrow \text{Fecha y hora actuales en formato UTC.}
+\]
+
+Se genera un bloque inicial con un hash vacío y luego se calcula el hash del bloque usando el módulo \texttt{Crypto}:
+
+\[
+\text{block.hash} = \text{Crypto.put\_hash(block)}
+\]
+
+\subsection*{\texttt{valid?/1}}
+\begin{verbatim}
+valid?(%Block{})
+\end{verbatim}
+
+Valida que un bloque sea correcto verificando si el hash almacenado coincide con el hash calculado a partir de los datos del bloque.
+
+\[
+\text{valid} = \text{block.hash} == \text{Crypto.hash(block)}
+\]
+
+\subsection*{\texttt{valid?/2}}
+\begin{verbatim}
+valid?(%Block{}, %Block{})
+\end{verbatim}
+
+Valida que dos bloques consecutivos sean correctos. Comprueba lo siguiente:
+
+\begin{itemize}
+    \item El \texttt{prev\_hash} del segundo bloque coincide con el \texttt{hash} del primer bloque.
+    \item El orden temporal entre los bloques es correcto: \texttt{block1.timestamp} $\leq$ \texttt{block2.timestamp}.
+    \item Ambos bloques son válidos individualmente: \texttt{Block.valid?(block1)} y \texttt{Block.valid?(block2)}.
+\end{itemize}
+
+\section*{Módulo \texttt{Blockchain}}
+
+\subsection*{\texttt{new\_genesis\_block/0}}
+\begin{verbatim}
+new_genesis_block()
+\end{verbatim}
+
+Crea el bloque génesis, que es el primer bloque de la blockchain. Este bloque contiene:
+
+\begin{itemize}
+    \item \texttt{data}: "Genesis Block".
+    \item \texttt{timestamp}: "2024-01-01 00:00:00Z".
+    \item \texttt{prev\_hash}: "0".
+\end{itemize}
+
+El hash se calcula con \texttt{Crypto.put\_hash(block)}.
+
+\subsection*{\texttt{new/0}}
+\begin{verbatim}
+new()
+\end{verbatim}
+
+Inicializa una nueva blockchain con el bloque génesis. Retorna una estructura de tipo \texttt{Blockchain}:
+
+\[
+\text{blockchain} = \%Blockchain\{\text{chain}: [\text{genesis\_block}]\}
+\]
+
+\subsection*{\texttt{valid?/1}}
+\begin{verbatim}
+valid?(%Blockchain{})
+\end{verbatim}
+
+Valida toda la blockchain asegurándose de que:
+
+\begin{itemize}
+    \item El hash de cada bloque coincide con el calculado para ese bloque.
+    \item El \texttt{prev\_hash} de cada bloque coincide con el \texttt{hash} del bloque anterior.
+    \item Los bloques están ordenados cronológicamente.
+\end{itemize}
+
+Utiliza \texttt{Enum.chunk\_every(2, 1, :discard)} para generar pares consecutivos de bloques, y luego verifica la validez de cada par con \texttt{Block.valid?/2}.
+
+\subsection*{\texttt{insert/2}}
+\begin{verbatim}
+insert(%Block{}, %Blockchain{})
+\end{verbatim}
+
+Inserta un nuevo bloque en la blockchain. Verifica que:
+
+\begin{itemize}
+    \item Existe un bloque previo (\texttt{List.last(chain)}).
+    \item El nuevo bloque es válido en relación con el último bloque: \texttt{Block.valid?(last\_block, new\_block)}.
+\end{itemize}
+
+Si todo está en orden, entonces el nuevo bloque se añade a la cadena:
+
+\[
+\text{updated\_chain} = \text{chain} ++ [\text{new\_block}]
+\]
+
+Si no está en orden, retorna un error indicando que el bloque no es válido.\\
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section*{Archivo \textbf{Grafica.ex}:}
+
+\section*{Módulo \texttt{Grafica}}
+
+\subsection*{\texttt{inicia/1}}
+\begin{verbatim}
+inicia(estado_inicial \\ %{})
+\end{verbatim}
+
+Inicializa un nodo con un estado inicial, que incluye:
+
+\begin{itemize}
+    \item \texttt{vecinos}: lista de otros nodos con los que se comunica.
+    \item \texttt{blockchain}: blockchain actual del nodo (inicializada con \texttt{Blockchain.new()}).
+    \item \texttt{bizantino}: indica si el nodo es malicioso (\texttt{true}) o no (\texttt{false}).
+    \item \texttt{mensajes}: estructura para almacenar mensajes de tipo \texttt{prepare} y \texttt{commit}.
+\end{itemize}
+
+El nodo llama a \texttt{recibe\_mensaje/1} para comenzar a procesar mensajes.
+
+\subsection*{\texttt{recibe\_mensaje/1}}
+\begin{verbatim}
+recibe_mensaje(estado)
+\end{verbatim}
+
+Espera y procesa mensajes recibidos de otros nodos. Llama a \texttt{procesa\_mensaje/2} para manejar cada mensaje y actualiza el estado del nodo.
+
+\subsection*{\texttt{procesa\_mensaje/2}}
+\begin{verbatim}
+procesa_mensaje(mensaje, estado)
+\end{verbatim}
+
+Procesa diferentes tipos de mensajes. Los cuales son:
+
+\paragraph{\texttt{Estado}}
+Muestra el estado actual del nodo y reinicia los mensajes.
+
+\[
+\text{estado} = \text{reiniciar\_mensajes\_y\_vistos(estado)}
+\]
+
+\paragraph{\texttt{Vecinos}}
+Asigna una lista de vecinos al nodo y actualiza su estado.
+
+\[
+\text{estado} = \text{Map.put(estado, :vecinos, vecinos)}
+\]
+
+\paragraph{\texttt{Bloque}}
+Envía un bloque a los vecinos. Si el nodo es bizantino, envía un bloque modificado con datos corruptos.
+
+\paragraph{\texttt{Preprepare}}
+Procesa un mensaje \texttt{preprepare}. Si el bloque es válido, envía un mensaje \texttt{prepare} a los vecinos.
+
+\paragraph{\texttt{Prepare}}
+Procesa un mensaje \texttt{prepare}. Si el nodo no ha visto el mensaje antes, lo agrega a sus mensajes y verifica si se alcanza un cuórum. Si el cuórum es suficiente, envía un mensaje \texttt{commit}.
+
+\paragraph{\texttt{Commit}}
+Procesa un mensaje \texttt{commit}. Si el nodo no ha visto el mensaje antes, lo agrega a la blockchain una vez alcanzado el cuórum.
+
+\subsection*{\texttt{reiniciar\_mensajes\_y\_vistos/1}}
+\begin{verbatim}
+reiniciar_mensajes_y_vistos(estado)
+\end{verbatim}
+
+Reinicia los mensajes (\texttt{prepare} y \texttt{commit}) y limpia la lista de mensajes vistos.
+
+\[
+\text{estado} = \text{Map.put(estado, :mensajes, \%{:prepare => [], :commit => []})}
+\]
+
+\subsection*{\texttt{actualizar\_mensajes/3}}
+\begin{verbatim}
+actualizar_mensajes(estado, tipo, mensaje)
+\end{verbatim}
+
+Agrega un mensaje a la lista correspondiente (\texttt{prepare} o \texttt{commit}).
+
+\[
+\text{mensajes\_actualizados} = \text{Map.update(estado[:mensajes], tipo, [mensaje], {[mensaje | \&1]})}
+\]
+
+\subsection*{\texttt{suficiente\_cuorum?/2}}
+\begin{verbatim}
+suficiente_cuorum?(estado, tipo)
+\end{verbatim}
+
+Verifica si se alcanzó un cuórum para un tipo de mensaje (\texttt{prepare} o \texttt{commit}). Calcula un umbral basado en la cantidad de nodos:
+
+\[
+\text{threshold} = \left\lfloor \frac{2 \cdot (\text{total\_nodos})}{3} \right\rfloor + 1
+\]
+
+Retorna \texttt{true} si el número de mensajes únicos es suficiente para alcanzar el cuórum.
+
+\subsection*{\texttt{agregar\_bloque/2}}
+\begin{verbatim}
+agregar_bloque(bloque, estado)
+\end{verbatim}
+
+Agrega un bloque a la blockchain del nodo si es válido. Si ocurre un error, mantiene el estado actual.
+
+\subsection*{\texttt{mensaje\_visto?/2}}
+\begin{verbatim}
+mensaje_visto?(estado, mensaje)
+\end{verbatim}
+
+Verifica si un mensaje ya ha sido visto por el nodo. Utiliza un conjunto (\texttt{MapSet}) para comprobar duplicados.
+
+\subsection*{\texttt{marcar\_mensaje\_visto/2}}
+\begin{verbatim}
+marcar_mensaje_visto(estado, mensaje)
+\end{verbatim}
+
+Marca un mensaje como visto y lo añade al conjunto \texttt{mensajes\_vistos}.
+
+%%%%%%%%%%%%%%%%%%%%%%
+\section*{Archivo \textbf{Crypto.ex}:}
+\section*{Módulo \texttt{Crypto}}
+
+El módulo \texttt{Crypto} asegura la integridad de los bloques en una blockchain.
+
+\subsection*{Atributo de Módulo}
+\begin{verbatim}
+@block_fields [:data, :timestamp, :prev_hash]
+\end{verbatim}
+
+Define los campos del bloque (\texttt{data}, \texttt{timestamp} y \texttt{prev\_hash}) que serán utilizados para calcular su hash.
+
+\subsection*{\texttt{hash/1}}
+\begin{verbatim}
+hash(%{} = block)
+\end{verbatim}
+
+Calcula el hash criptográfico de un bloque.
+
+\paragraph{Parámetros}
+\begin{itemize}
+    \item \texttt{block}: Un mapa que representa un bloque, utilizando \texttt{@block\_fields}.
+\end{itemize}
+
+\paragraph{Retorno}
+\begin{itemize}
+    \item Una cadena que representa el hash calculado para el bloque.
+\end{itemize}
+
+
+\subsection*{\texttt{put\_hash/1}}
+\begin{verbatim}
+put_hash(%{} = block)
+\end{verbatim}
+
+Calcula e inserta el hash en un bloque.
+
+\paragraph{Parámetros}
+\begin{itemize}
+    \item \texttt{block}: Un mapa que representa un bloque.
+\end{itemize}
+
+\paragraph{Retorno}
+\begin{itemize}
+    \item El bloque actualizado con un nuevo campo \texttt{:hash}, que contiene el hash calculado.
+\end{itemize}
+
+\paragraph{Funcionamiento}
+\begin{enumerate}
+    \item Llama a la función \texttt{hash/1} para calcular el hash del bloque.
+    \item Devuelve el bloque con el campo \texttt{:hash} actualizado.
+\end{enumerate}
+
+\subsection*{\texttt{encode\_to\_binary/1}}
+\begin{verbatim}
+encode_to_binary(map)
+\end{verbatim}
+
+Convierte un mapa en una representación binaria.
+
+\paragraph{Parámetros}
+\begin{itemize}
+    \item \texttt{map}: Un mapa cuyos valores serán convertidos a binario.
+\end{itemize}
+
+\paragraph{Retorno}
+\begin{itemize}
+    \item Una lista de caracteres binarios que representan el mapa.
+\end{itemize}
+
+\paragraph{Funcionamiento}
+\begin{enumerate}
+    \item Convierte cada valor del mapa a binario mediante la función \texttt{to\_binary/1}.
+    \item Une los valores binarios en una cadena.
+    \item Convierte la cadena a una lista binaria con \texttt{:erlang.binary\_to\_list/1}.
+\end{enumerate}
+
+\subsection*{\texttt{to\_binary/1}}
+\begin{verbatim}
+to_binary(value)
+\end{verbatim}
+
+Convierte un valor individual en su representación binaria.
+
+\paragraph{Parámetros}
+\begin{itemize}
+    \item \texttt{value}: Un valor de cualquier tipo.
+\end{itemize}
+
+\paragraph{Retorno}
+\begin{itemize}
+    \item Una representación binaria del valor. Si ya es binario, se retorna tal cual; de lo contrario, se convierte usando \texttt{inspect/1}.
+\end{itemize}
+
+\subsection*{\texttt{simple\_hash/1}}
+\begin{verbatim}
+simple_hash(binary)
+\end{verbatim}
+
+Calcula un hash sencillo a partir de una cadena binaria.
+
+\paragraph{Parámetros}
+\begin{itemize}
+    \item \texttt{binary}: Una cadena binaria de entrada.
+\end{itemize}
+
+\paragraph{Retorno}
+\begin{itemize}
+    \item Una cadena hexadecimal que representa el hash calculado.
+\end{itemize}
+
+\paragraph{Funcionamiento}
+\begin{enumerate}
+    \item Utiliza la función \texttt{:erlang.phash2/1} para calcular el hash de la cadena.
+    \item Convierte el valor resultante a una cadena hexadecimal con \texttt{Integer.to\_string/2}.
+\end{enumerate}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section*{Archivo Main.ex}
+
+\section*{Módulo \texttt{Main}}
+Este módulo controla la creación de una red de nodos utilizando el modelo de Watts y Strogatz. Simula una blockchain distribuida donde los nodos se comunican y llegan a consenso mediante el algoritmo PBFT.
+
+\subsection*{\texttt{run/2}}
+\begin{verbatim}
+run(n, f)
+\end{verbatim}
+
+Inicializa una red de nodos, simula el consenso enviando bloques válidos e inválidos y verifica los estados finales.
+
+\paragraph{Parámetros:}
+\begin{itemize}
+    \item \texttt{n}: Número total de nodos en la red.
+    \item \texttt{f}: Número de nodos bizantinos en la red.
+\end{itemize}
+
+\paragraph{Retorno:}
+\begin{itemize}
+    \item Lista de procesos de nodos creados.
+\end{itemize}
+
+\paragraph{Funcionamiento:}
+\begin{enumerate}
+    \item Crea nodos (honestos y bizantinos) mediante \texttt{crea\_nodos/2}.
+    \item Asigna vecinos a los nodos utilizando el modelo de Watts y Strogatz en \texttt{asigna\_vecinos/1}.
+    \item Simula el envío y la propagación de bloques válidos e inválidos.
+    \item Verifica el estado final de los nodos.
+\end{enumerate}
+
+\subsection*{\texttt{crea\_nodos/2}}
+\begin{verbatim}
+crea_nodos(n, f)
+\end{verbatim}
+
+Crea una lista de nodos que incluye:
+\begin{itemize}
+    \item \texttt{f} nodos bizantinos creados con \texttt{NodoBizantino.inicia/0}.
+    \item \texttt{n-f} nodos honestos creados con \texttt{NodoHonesto.inicia/0}.
+\end{itemize}
+
+\paragraph{Retorno:}
+\begin{itemize}
+    \item Lista de procesos de nodos creados.
+\end{itemize}
+
+\subsection*{\texttt{asigna\_vecinos/1}}
+\begin{verbatim}
+asigna_vecinos(procesos)
+\end{verbatim}
+
+Asigna vecinos a los nodos de la red, utilizando un modelo en anillo con probabilidades de reconexión aleatoria.
+
+\paragraph{Funcionamiento:}
+\begin{enumerate}
+    \item Asigna a cada nodo \texttt{k} vecinos iniciales en un anillo.
+    \item Introduce conexiones aleatorias con probabilidad de reenlace \texttt{0.1}.
+    \item Verifica que el coeficiente de agrupamiento sea mayor a \texttt{0.4}.
+\end{enumerate}
+
+\paragraph{Retorno:}
+Ninguno. Envía mensajes con los vecinos asignados a cada nodo.
+
+\subsection*{\texttt{clustering\_coefficient/2}}
+\begin{verbatim}
+clustering_coefficient(vecinos, procesos)
+\end{verbatim}
+
+Calcula el coeficiente de agrupamiento de la red.
+
+\paragraph{Parámetros:}
+\begin{itemize}
+    \item \texttt{vecinos}: Lista de listas que representa los vecinos de cada nodo.
+    \item \texttt{procesos}: Lista de procesos de los nodos.
+\end{itemize}
+
+\paragraph{Retorno:}
+\begin{itemize}
+    \item El coeficiente de agrupamiento (promedio del número de triángulos formados por los nodos).
+\end{itemize}
+
+---
+
+\section*{Módulo \texttt{NodoHonesto}}
+Simula un nodo honesto que participa de manera no maliciosa en la red.
+
+\subsection*{\texttt{inicia/0}}
+\begin{verbatim}
+inicia()
+\end{verbatim}
+
+Inicia un nodo honesto con un estado inicial:
+
+\begin{itemize}
+    \item \texttt{vecinos}: Lista de vecinos asignados.
+    \item \texttt{blockchain}: Blockchain inicializada.
+    \item \texttt{bizantino}: \texttt{false}.
+    \item \texttt{mensajes}: Diccionario vacío para almacenar mensajes \texttt{prepare} y \texttt{commit}.
+\end{itemize}
+
+Llama a \texttt{Grafica.inicia/1} para iniciar el nodo.
+
+---
+
+\section*{Módulo \texttt{NodoBizantino}}
+Simula un nodo bizantino que actúa de manera maliciosa en la red.
+
+\subsection*{\texttt{inicia/0}}
+\begin{verbatim}
+inicia()
+\end{verbatim}
+
+Inicia un nodo bizantino con un estado inicial:
+
+\begin{itemize}
+    \item \texttt{vecinos}: Lista de vecinos asignados.
+    \item \texttt{blockchain}: Blockchain inicializada.
+    \item \texttt{bizantino}: \texttt{true}.
+    \item \texttt{mensajes}: Diccionario vacío para almacenar mensajes \texttt{prepare} y \texttt{commit}.
+\end{itemize}
+
+Llama a \texttt{Grafica.inicia/1} para iniciar el nodo.
+
+}
+
+
