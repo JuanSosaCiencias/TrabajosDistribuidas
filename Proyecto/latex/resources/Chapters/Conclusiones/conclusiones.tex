@@ -1,0 +1,14 @@
+\large{
+Durante la implementación de nuestra variante del algoritmo \texttt{Practical Byzantine Fault Tolerance (PBFT)}, llegamos a las siguientes conclusiones:\\
+
+- \textbf{Eliminación del líder:}\\ 
+   Permitimos que cualquier nodo propusiera bloques, eliminando la dependencia del líder. Esto simplificó la lógica aunque incrementó el volumen de mensajes.\\
+
+- \textbf{Topología de red:} \\
+   Usar el modelo de \texttt{Watts y Strogatz} permitió una rápida propagación de mensajes gracias a un alto coeficiente de agrupamiento. \\
+
+- \textbf{Tolerancia a nodos bizantinos:}\\
+   Suponiendo que hay \(f\) nodos bizantinos, el algoritmo funciona correctamente en configuraciones de \(3f + 1\), logrando consenso a pesar de las fallas. \\
+
+En conclusión, implementamos una solución descentralizada basada en \texttt{PBFT} adaptada a redes distribuidas. Es posible escalar el proyecto y asegurarse que funcione correctamente en más escenarios, como varios procesos intentando mandar mensaje al mismo tiempo. 
+}
