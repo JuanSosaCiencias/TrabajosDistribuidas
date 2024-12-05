@@ -1,14 +1,20 @@
-# -------- Módulo Main --------
 defmodule Main do
   @moduledoc """
-  Módulo principal que maneja la creación de la red de nodos, incluyendo procesos honestos y bizantinos,
-  y simula la blockchain distribuida.
+  Módulo principal que maneja la creación de una red de nodos utilizando el modelo Watts y Strogatz. Incluye procesos honestos y bizantinos.
+  Simula la blockchain distribuida con nodos que participan en el consenso a través de un algoritmo basado en Practical Byzantine Fault Tolerance.
   """
 
   @doc """
   Función principal que inicializa la red de `n` nodos y `f` procesos bizantinos.
 
-  NOTA: Aun no se ha implementado la lógica de consenso, ni validación de bloques, ni propagación de mensajes, ni blockchain real, solo crea los nodos y crea la grafica
+  Además simula el consenso enviando bloques válidos e inválidos a través de la red.
+
+   ## Parámetros:
+  - `n`: El número total de nodos en la red.
+  - `f`: El número de nodos bizantinos en la red.
+
+   ## Retorna:
+  La lista de los procesos para permitir la interacción manual.
   """
   def run(n, f) do
     IO.puts("\n\n Iniciando la red con #{n} nodos, incluyendo #{f} procesos bizantinos...\n ")
@@ -23,7 +29,7 @@ defmodule Main do
     Process.sleep(1000)
     IO.puts("\n Vecinos asignados ... \n")
 
-    # se toma un proceso cualquiera para mandar el primer bloque
+    # Se toma un proceso cualquiera para mandar el primer bloque
     ([h | _]) = procesos
 
     # Crear un nuevo bloque para enviar al proceso (válido)
@@ -158,9 +164,6 @@ defmodule Main do
   end
 end
 
-# --------end--------
-
-# -------- Módulo NodoHonesto --------
 defmodule NodoHonesto do
   @moduledoc """
   Módulo de nodo honesto que simula un proceso no malicioso en la red.
@@ -179,9 +182,7 @@ defmodule NodoHonesto do
     Grafica.inicia(estado_inicial)
   end
 end
-# --------end--------
 
-# -------- Módulo NodoBizantino --------
 defmodule NodoBizantino do
   @moduledoc """
   Módulo de nodo bizantino que simula un proceso malicioso en la red.
@@ -200,4 +201,3 @@ defmodule NodoBizantino do
     Grafica.inicia(estado_inicial)
   end
 end
-# --------end--------
