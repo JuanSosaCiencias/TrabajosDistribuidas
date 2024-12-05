@@ -1,1 +1,15 @@
 *.beam
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+*.toc
+<<<<<<< HEAD
+*.bbl
+*.bcf
+*.blg
+*.run.xml
+=======
+>>>>>>> f3c607164d00e80c3c548a1b744b9be8825fbcd5
