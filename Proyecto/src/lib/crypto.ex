@@ -1,8 +1,18 @@
 defmodule Crypto do
-
+  @moduledoc """
+  Módulo que asegura la integridad de los bloques utilizando funciones de hashing criptográfico.
+  """
   @block_fields [:data, :timestamp, :prev_hash]
 
-  @doc "Calcula el hash de un bloque"
+  @doc """
+  Calcula el hash de un bloque. 
+
+  ## Parámetros:
+  - `block`: El bloque a calcular su hash
+
+  ## Retorna:
+  Una cadena que es el hash del bloque.
+  """
   def hash(%{} = block) do
     block
     |> Map.take(@block_fields)
@@ -10,12 +20,19 @@ defmodule Crypto do
     |> simple_hash()
   end
 
-  @doc "Calcula e inserta el hash en el bloque"
+  @doc """
+  Calcula e inserta el hash en el bloque
+
+  ## Parámetros:
+  - `block`: Un bloque.
+
+  ## Retorna:
+  El bloque con el campo `:hash` añadido.
+  """
   def put_hash(%{} = block) do
     %{block | hash: hash(block)}
   end
 
-  # ChatGPT me ayudó porque encode no acepta no binarios
   defp encode_to_binary(map) do
     map
     |> Enum.map(fn {_, value} -> to_binary(value) end)
