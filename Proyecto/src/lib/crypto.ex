@@ -5,7 +5,7 @@ defmodule Crypto do
   @block_fields [:data, :timestamp, :prev_hash]
 
   @doc """
-  Calcula el hash de un bloque. 
+  Calcula el hash de un bloque.
 
   ## Parámetros:
   - `block`: El bloque a calcular su hash
@@ -42,7 +42,6 @@ defmodule Crypto do
 
   defp to_binary(value) when is_binary(value), do: value
   defp to_binary(value), do: inspect(value)
-
 
   defp simple_hash(binary) do
     :erlang.phash2(binary) |> Integer.to_string(16)

@@ -117,11 +117,21 @@ end
     end
   end
 
-   @doc """
-  El nodo verifica si el mensaje ya ha sido visto. 
+  @doc """
+  Procesa diferentes tipos de mensajes y actualiza el estado en consecuencia.
 
-  Si no ha sido visto se agrega a los mensajes y se retransmite. 
-  Si se alcanza un cuórum de mensajes `:commit` el bloque se agrega a la blockchain.
+  ## Parámetros
+    - `mensaje`: Una tupla que representa el mensaje a procesar. Puede ser uno de los siguientes:
+      - `{:commit, bloque, nodo_id}`: Indica que un nodo ha confirmado un bloque.
+      - `{:preprepare, bloque, _lider_id}`: Indica que el líder ha enviado un bloque para pre-preparación.
+      - `{:bloque, bloque}`: Indica que se ha recibido un nuevo bloque.
+      - `{:vecinos, vecinos}`: Indica que se ha recibido una lista de vecinos.
+      - `{:estado, _}`: Indica que se ha recibido una solicitud de estado.
+
+    - `estado`: El estado actual del sistema.
+
+  ## Retorno
+    - El nuevo estado del sistema después de procesar el mensaje.
   """
   def procesa_mensaje({:commit, bloque, nodo_id} = mensaje, estado) do
     if not mensaje_visto?(estado, mensaje) do
@@ -144,6 +154,7 @@ end
     end
   end
 
+  # Funciono auxiliar que reinicia los mensajes y mensajes vistos para un nuevo consenso.
   defp reiniciar_mensajes_y_vistos(estado) do
     # IO.puts("Proceso #{inspect(self())}: Reiniciando mensajes y mensajes vistos para un nuevo consenso.")
     estado
@@ -151,11 +162,13 @@ end
     |> Map.put(:mensajes_vistos, MapSet.new())
   end
 
+  # Funcion auxiliar para actualizar los mensajes recibidos por el nodo.
   defp actualizar_mensajes(estado, tipo, mensaje) do
     mensajes_actualizados = Map.update(estado[:mensajes], tipo, [mensaje], &[mensaje | &1])
     Map.put(estado, :mensajes, mensajes_actualizados)
   end
 
+  # Funcion auxiliar para verificar si se ha alcanzado el cuórum necesario para avanzar en el consenso.
   defp suficiente_cuorum?(estado, tipo) do
     mensajes = Map.get(estado[:mensajes], tipo, [])
     unique_mensajes = Enum.uniq_by(mensajes, fn {bloque, _} -> bloque end)
@@ -163,9 +176,10 @@ end
     threshold = div(2 * total_nodos, 3) + 1
 
     # IO.puts("Proceso #{inspect(self())}: Mensajes únicos: #{inspect(unique_mensajes)}, threshold: #{threshold}")
-    length(unique_mensajes) < threshold ## Esta linea es la que esta mal deberia ser >= pero no jala asi entonces uwu
+    length(unique_mensajes) < threshold
   end
 
+  # Funcion auxiliar para agregar un bloque a la blockchain del nodo.
   defp agregar_bloque(bloque, estado) do
     case Blockchain.insert(bloque, estado[:blockchain]) do
       {:ok, blockchain_actualizada} ->
@@ -178,12 +192,13 @@ end
     end
   end
 
-  # Helper functions for message deduplication
+  # Funcion auxiliar para verificar si un mensaje ya ha sido visto por el nodo.
   defp mensaje_visto?(estado, mensaje) do
     vistos = Map.get(estado, :mensajes_vistos, MapSet.new())
     MapSet.member?(vistos, mensaje)
   end
 
+  # Funcion auxiliar para marcar un mensaje como visto por el nodo.
   defp marcar_mensaje_visto(estado, mensaje) do
     vistos = Map.get(estado, :mensajes_vistos, MapSet.new())
     Map.put(estado, :mensajes_vistos, MapSet.put(vistos, mensaje))

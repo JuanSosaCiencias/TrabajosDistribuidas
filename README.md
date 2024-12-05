@@ -14,6 +14,11 @@ Este proyecto consiste en desarrollar una **blockchain** para un sistema de crip
 
 ---
 
+### **Documentación**
+El proyecto cuenta con documentación, se encuentra en el path `Proyecto/src/doc/index.html` si lo ejecutas en un navegador te mostrara una vista con la documentación generada a partir de `ExDoc`.
+
+---
+
 ### **Cómo Usar el Proyecto**
 
 Dentro de la carpeta `src` encontrarás dos scripts:
